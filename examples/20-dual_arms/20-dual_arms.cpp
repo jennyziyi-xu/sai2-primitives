@@ -33,7 +33,7 @@ map<int, bool> key_pressed = {
 	{GLFW_KEY_L, false},
 	{GLFW_KEY_W, false},
 	{GLFW_KEY_O, false},
-	{GLFW_KEY_Y, false}, // key added 
+	{GLFW_KEY_J, false}, // key added 
 };
 map<int, bool> key_was_pressed = key_pressed;
 
@@ -85,14 +85,8 @@ int main() {
 			key_pressed[key.first] = graphics->isKeyPressed(key.first);
 		}
 
-		if (key_pressed.at(GLFW_KEY_Y) &&
-			!key_was_pressed.at(GLFW_KEY_Y)){
-				graphics->updateRobotGraphics(robot_name_2,
-									  sim->getJointPositions(robot_name_2));
-		} else{
-			graphics->updateRobotGraphics(robot_name_1,
-									  sim->getJointPositions(robot_name_1));
-		}
+		graphics->updateRobotGraphics(robot_name_2, sim->getJointPositions(robot_name_2));
+		graphics->updateRobotGraphics(robot_name_1, sim->getJointPositions(robot_name_1));	
 
 		graphics->updateDisplayedForceSensor(sim->getAllForceSensorData()[0]);
 		graphics->renderGraphicsWorld();
@@ -114,8 +108,8 @@ int main() {
 //------------------------------------------------------------------------------
 void runSim(shared_ptr<Sai2Simulation::Sai2Simulation> sim, const string robot_name) {
 
-	// if (key_pressed.at(GLFW_KEY_Y) &&
-	// 	!key_was_pressed.at(GLFW_KEY_Y)){
+	// if (key_pressed.at(GLFW_KEY_J) &&
+	// 	!key_was_pressed.at(GLFW_KEY_J)){
 	// 		robot_name = 'PANDA2';
 	// }
 
@@ -128,11 +122,10 @@ void runSim(shared_ptr<Sai2Simulation::Sai2Simulation> sim, const string robot_n
 	while (fSimulationRunning) {
 		simTimer.waitForNextLoop();
 
-		cout << "key_pressed.at(GLFW_KEY_Y)" << key_pressed.at(GLFW_KEY_Y) << endl;
-		cout << "key_was_pressed.at(GLFW_KEY_Y)" << key_was_pressed.at(GLFW_KEY_Y) << endl;
+		// cout << "key_pressed.at(GLFW_KEY_J)" << key_pressed.at(GLFW_KEY_J) << endl;
+		// cout << "key_was_pressed.at(GLFW_KEY_J)" << key_was_pressed.at(GLFW_KEY_J) << endl;
 
-		if (key_pressed.at(GLFW_KEY_Y) &&
-			!key_was_pressed.at(GLFW_KEY_Y) && robot_name == robot_name_2) {
+		if (key_pressed.at(GLFW_KEY_J) && robot_name == robot_name_2) {
 				
 				{
 					lock_guard<mutex> lock(mtx);
@@ -140,7 +133,7 @@ void runSim(shared_ptr<Sai2Simulation::Sai2Simulation> sim, const string robot_n
 				}
 				sim->integrate();
 			}
-		else if (!key_pressed.at(GLFW_KEY_Y) && robot_name == robot_name_1) {
+		else if (!key_pressed.at(GLFW_KEY_J) && robot_name == robot_name_1) {
 			
 			{
 				lock_guard<mutex> lock(mtx);
@@ -161,8 +154,8 @@ void runSim(shared_ptr<Sai2Simulation::Sai2Simulation> sim, const string robot_n
 void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim, const string robot_name) {
 
 
-	// if (key_pressed.at(GLFW_KEY_Y) &&
-	// 	!key_was_pressed.at(GLFW_KEY_Y)){
+	// if (key_pressed.at(GLFW_KEY_J) &&
+	// 	!key_was_pressed.at(GLFW_KEY_J)){
 	// 		robot_name = 'PANDA2';
 	// }
 
@@ -268,8 +261,8 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim, const string rob
 		// wait for next scheduled loop
 		controlTimer.waitForNextLoop();
 
-		if ((key_pressed.at(GLFW_KEY_Y) &&
-			!key_was_pressed.at(GLFW_KEY_Y) && robot_name == robot_name_2) || (!key_pressed.at(GLFW_KEY_Y) && robot_name == robot_name_1)){
+		if ((key_pressed.at(GLFW_KEY_J)  && robot_name == robot_name_2)
+			|| (!key_pressed.at(GLFW_KEY_J) && robot_name == robot_name_1)){
 
 			// read robot data from simulation thread
 			robot->setQ(sim->getJointPositions(robot_name));
