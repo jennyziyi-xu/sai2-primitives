@@ -85,8 +85,13 @@ int main() {
 			key_pressed[key.first] = graphics->isKeyPressed(key.first);
 		}
 
-		graphics->updateRobotGraphics(robot_name_2, sim->getJointPositions(robot_name_2));
-		graphics->updateRobotGraphics(robot_name_1, sim->getJointPositions(robot_name_1));	
+		if (key_pressed.at(GLFW_KEY_J)) {
+			graphics->updateRobotGraphics(robot_name_2, sim->getJointPositions(robot_name_2));
+		} else {
+			graphics->updateRobotGraphics(robot_name_1, sim->getJointPositions(robot_name_1));	
+		}
+		
+		
 
 		graphics->updateDisplayedForceSensor(sim->getAllForceSensorData()[0]);
 		graphics->renderGraphicsWorld();
@@ -126,15 +131,13 @@ void runSim(shared_ptr<Sai2Simulation::Sai2Simulation> sim, const string robot_n
 		// cout << "key_was_pressed.at(GLFW_KEY_J)" << key_was_pressed.at(GLFW_KEY_J) << endl;
 
 		if (key_pressed.at(GLFW_KEY_J) && robot_name == robot_name_2) {
-				
-				{
-					lock_guard<mutex> lock(mtx);
-					sim->setJointTorques(robot_name, robot_control_torques);
-				}
-				sim->integrate();
+			{
+				lock_guard<mutex> lock(mtx);
+				sim->setJointTorques(robot_name, robot_control_torques);
 			}
+			sim->integrate();
+		}
 		else if (!key_pressed.at(GLFW_KEY_J) && robot_name == robot_name_1) {
-			
 			{
 				lock_guard<mutex> lock(mtx);
 				sim->setJointTorques(robot_name, robot_control_torques);
