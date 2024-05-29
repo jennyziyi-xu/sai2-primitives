@@ -18,8 +18,8 @@ using namespace Eigen;
 using namespace Sai2Common::ChaiHapticDriverKeys;
 
 namespace {
-const string world_file = "${EXAMPLE_20_FOLDER}/world.urdf";
-const string robot_file = "${EXAMPLE_20_FOLDER}/panda_arm.urdf";
+const string world_file = "${EXAMPLE_21_FOLDER}/world.urdf";
+const string robot_file = "${EXAMPLE_21_FOLDER}/panda_arm.urdf";
 const string robot_name_1 = "PANDA";
 const string robot_name_2 = "PANDA2";
 const string link_name = "end-effector";
@@ -44,7 +44,7 @@ map<int, bool> key_was_pressed = key_pressed;
 }  // namespace
 
 // Create simulation and control function
-void runSim(shared_ptr<Sai2Simulation::Sai2Simulation> sim, const string robot_name);
+void runSim(shared_ptr<Sai2Simulation::Sai2Simulation> sim);
 void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim, const string robot_name);
 
 // robot joint data
@@ -53,8 +53,8 @@ VectorXd robot_control_torques_2 = Eigen::VectorXd::Zero(7);
 
 
 int main() {
-	Sai2Model::URDF_FOLDERS["EXAMPLE_20_FOLDER"] =
-		string(EXAMPLES_FOLDER) + "/20-dual_arms";
+	Sai2Model::URDF_FOLDERS["EXAMPLE_21_FOLDER"] =
+		string(EXAMPLES_FOLDER) + "/21-dual_arms_keyboard";
 	// set up signal handler
 	signal(SIGABRT, &sighandler);
 	signal(SIGTERM, &sighandler);
@@ -72,14 +72,12 @@ int main() {
 	auto graphics = make_shared<Sai2Graphics::Sai2Graphics>(world_file);
 	graphics->addForceSensorDisplay(sim->getAllForceSensorData()[0]);
 
-	// Run simulation and control threads for robot arm 1
-	thread sim_thread_1(runSim, sim, robot_name_1);
+	// Run simulation for both robot arms
+	thread sim_thread(runSim, sim);
+
+	// control threads for each individual robot
 	thread control_thread_1(runControl, sim, robot_name_1);
-
-	// Run simulation and control threads for robot arm 2
-	thread sim_thread_2(runSim, sim, robot_name_2);
 	thread control_thread_2(runControl, sim, robot_name_2);
-
 
 	// graphics timer
 	Sai2Common::LoopTimer graphicsTimer(30.0, 1e6);
@@ -107,10 +105,8 @@ int main() {
 
 	// stop simulation and control threads
 	fSimulationRunning = false;
-	sim_thread_1.join();
+	sim_thread.join();
 	control_thread_1.join();
-
-	sim_thread_2.join();
 	control_thread_2.join();
 
 	return 0;
@@ -119,13 +115,7 @@ int main() {
 //------------------------------------------------------------------------------
 ////// Simulation thread //////
 //------------------------------------------------------------------------------
-void runSim(shared_ptr<Sai2Simulation::Sai2Simulation> sim, const string robot_name) {
-
-	// if (key_pressed.at(GLFW_KEY_J) &&
-	// 	!key_was_pressed.at(GLFW_KEY_J)){
-	// 		robot_name = 'PANDA2';
-	// }
-
+void runSim(shared_ptr<Sai2Simulation::Sai2Simulation> sim) {
 
 	// create a timer
 	Sai2Common::LoopTimer simTimer(1.0 / sim->timestep(), 1e6);
@@ -135,23 +125,16 @@ void runSim(shared_ptr<Sai2Simulation::Sai2Simulation> sim, const string robot_n
 	while (fSimulationRunning) {
 		simTimer.waitForNextLoop();
 
-		// cout << "key_pressed.at(GLFW_KEY_J)" << key_pressed.at(GLFW_KEY_J) << endl;
-		// cout << "key_was_pressed.at(GLFW_KEY_J)" << key_was_pressed.at(GLFW_KEY_J) << endl;
+		{
+			lock_guard<mutex> lock(mtx);
+			sim->setJointTorques(robot_name_1, robot_control_torques);
+		}
 
-		if (key_pressed.at(GLFW_KEY_J) && robot_name == robot_name_2) {
-			{
-				lock_guard<mutex> lock(mtx);
-				sim->setJointTorques(robot_name, robot_control_torques);
-			}
-			sim->integrate();
+		{
+			lock_guard<mutex> lock(mtx);
+			sim->setJointTorques(robot_name_2, robot_control_torques_2);
 		}
-		else if (!key_pressed.at(GLFW_KEY_J) && robot_name == robot_name_1) {
-			{
-				lock_guard<mutex> lock(mtx);
-				sim->setJointTorques(robot_name, robot_control_torques);
-			}
-			sim->integrate();
-		}
+		sim->integrate();
 		
 	}
 
@@ -163,14 +146,6 @@ void runSim(shared_ptr<Sai2Simulation::Sai2Simulation> sim, const string robot_n
 ////// Control thread //////
 //------------------------------------------------------------------------------
 void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim, const string robot_name) {
-
-
-	// if (key_pressed.at(GLFW_KEY_J) &&
-	// 	!key_was_pressed.at(GLFW_KEY_J)){
-	// 		robot_name = 'PANDA2';
-	// }
-
-
 	// redis client
 	auto redis_client = Sai2Common::RedisClient();
 	redis_client.connect();
