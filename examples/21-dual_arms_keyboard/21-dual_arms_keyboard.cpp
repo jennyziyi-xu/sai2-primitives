@@ -18,8 +18,8 @@ using namespace Eigen;
 using namespace Sai2Common::ChaiHapticDriverKeys;
 
 namespace {
-const string world_file = "${EXAMPLE_21_FOLDER}/world.urdf";
-const string robot_file = "${EXAMPLE_21_FOLDER}/panda_arm.urdf";
+const string world_file = "${EXAMPLE_20_FOLDER}/world.urdf";
+const string robot_file = "${EXAMPLE_20_FOLDER}/panda_arm.urdf";
 const string robot_name_1 = "PANDA";
 const string robot_name_2 = "PANDA2";
 const string link_name = "end-effector";
@@ -45,7 +45,10 @@ map<int, bool> key_was_pressed = key_pressed;
 
 // Create simulation and control function
 void runSim(shared_ptr<Sai2Simulation::Sai2Simulation> sim);
-void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim, const string robot_name);
+void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim, 
+				shared_ptr<Sai2Model::Sai2Model> robot,
+				const string robot_name
+);
 
 // robot joint data
 VectorXd robot_control_torques = Eigen::VectorXd::Zero(7);
@@ -53,8 +56,8 @@ VectorXd robot_control_torques_2 = Eigen::VectorXd::Zero(7);
 
 
 int main() {
-	Sai2Model::URDF_FOLDERS["EXAMPLE_21_FOLDER"] =
-		string(EXAMPLES_FOLDER) + "/21-dual_arms_keyboard";
+	Sai2Model::URDF_FOLDERS["EXAMPLE_20_FOLDER"] =
+		string(EXAMPLES_FOLDER) + "/20-dual_arms";
 	// set up signal handler
 	signal(SIGABRT, &sighandler);
 	signal(SIGTERM, &sighandler);
@@ -72,12 +75,30 @@ int main() {
 	auto graphics = make_shared<Sai2Graphics::Sai2Graphics>(world_file);
 	graphics->addForceSensorDisplay(sim->getAllForceSensorData()[0]);
 
+	// load robot
+	// [1] for robot_name_1
+	const Affine3d T_world_robot = sim->getRobotBaseTransform(robot_name_1);
+	auto robot = make_shared<Sai2Model::Sai2Model>(robot_file);
+	robot->setTRobotBase(T_world_robot);
+	robot->setQ(sim->getJointPositions(robot_name_1));
+	robot->setDq(sim->getJointVelocities(robot_name_1));
+	robot->updateModel();
+
+	// [2] for robot_name_2
+	const Affine3d T_world_robot_2 = sim->getRobotBaseTransform(robot_name_2);
+	auto robot_2 = make_shared<Sai2Model::Sai2Model>(robot_file);
+	robot_2->setTRobotBase(T_world_robot_2);
+	robot_2->setQ(sim->getJointPositions(robot_name_2));
+	robot_2->setDq(sim->getJointVelocities(robot_name_2));
+	robot_2->updateModel();
+
+
 	// Run simulation for both robot arms
 	thread sim_thread(runSim, sim);
 
 	// control threads for each individual robot
-	thread control_thread_1(runControl, sim, robot_name_1);
-	thread control_thread_2(runControl, sim, robot_name_2);
+	thread control_thread_1(runControl, sim, robot, robot_name_1);
+	thread control_thread_2(runControl, sim, robot_2, robot_name_2);
 
 	// graphics timer
 	Sai2Common::LoopTimer graphicsTimer(30.0, 1e6);
@@ -145,18 +166,13 @@ void runSim(shared_ptr<Sai2Simulation::Sai2Simulation> sim) {
 //------------------------------------------------------------------------------
 ////// Control thread //////
 //------------------------------------------------------------------------------
-void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim, const string robot_name) {
+void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim, 
+				shared_ptr<Sai2Model::Sai2Model> robot, 
+				const string robot_name
+				) {
 	// redis client
 	auto redis_client = Sai2Common::RedisClient();
 	redis_client.connect();
-
-	// load robot
-	const Affine3d T_world_robot = sim->getRobotBaseTransform(robot_name);
-	auto robot = make_shared<Sai2Model::Sai2Model>(robot_file);
-	robot->setTRobotBase(T_world_robot);
-	robot->setQ(sim->getJointPositions(robot_name));
-	robot->setDq(sim->getJointVelocities(robot_name));
-	robot->updateModel();
 
 	// instructions
 	cout
