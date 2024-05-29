@@ -55,6 +55,8 @@ VectorXd robot_control_torques = Eigen::VectorXd::Zero(7);
 VectorXd robot_control_torques_2 = Eigen::VectorXd::Zero(7);
 bool robot_1_is_under_control = true;
 
+bool key_board_only = true;
+
 
 int main() {
 	Sai2Model::URDF_FOLDERS["EXAMPLE_20_FOLDER"] =
@@ -328,26 +330,36 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 				motion_force_task->setGoalOrientation(robot->rotationInWorld(link_name));
 			}
 			else {
-				// compute haptic control
-				haptic_input.robot_position = robot->positionInWorld(link_name);
-				haptic_input.robot_orientation = robot->rotationInWorld(link_name);
-				haptic_input.robot_linear_velocity =
-					robot->linearVelocityInWorld(link_name);
-				haptic_input.robot_angular_velocity =
-					robot->angularVelocityInWorld(link_name);
-				haptic_input.robot_sensed_force =
-					motion_force_task->getSensedForceControlWorldFrame();
-				haptic_input.robot_sensed_moment =
-					motion_force_task->getSensedMomentControlWorldFrame();
+				if (key_board_only) {
+					motion_force_task->setGoalPosition(
+						robot->positionInWorld(link_name) + delta_xyz
+						);
+					motion_force_task->setGoalOrientation(robot->rotationInWorld(link_name));
+				} else {
+					// compute haptic control
+					haptic_input.robot_position = robot->positionInWorld(link_name);
+					haptic_input.robot_orientation = robot->rotationInWorld(link_name);
+					haptic_input.robot_linear_velocity =
+						robot->linearVelocityInWorld(link_name);
+					haptic_input.robot_angular_velocity =
+						robot->angularVelocityInWorld(link_name);
+					haptic_input.robot_sensed_force =
+						motion_force_task->getSensedForceControlWorldFrame();
+					haptic_input.robot_sensed_moment =
+						motion_force_task->getSensedMomentControlWorldFrame();
 
-				haptic_output = haptic_controller->computeHapticControl(haptic_input);
+					haptic_output = haptic_controller->computeHapticControl(haptic_input);
 
-				motion_force_task->setGoalPosition(haptic_output.robot_goal_position);
-				motion_force_task->setGoalOrientation(
-					haptic_output.robot_goal_orientation);
+					motion_force_task->setGoalPosition(haptic_output.robot_goal_position);
+					motion_force_task->setGoalOrientation(
+						haptic_output.robot_goal_orientation);
+				}
+
 				redis_client.sendAllFromGroup();
+
 			}
-			// redis_client.sendAllFromGroup();
+			
+			// lockers
 			{
 				lock_guard<mutex> lock(mtx);
 				robot_control_torques = robot_controller->computeControlTorques();
@@ -362,27 +374,37 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 				motion_force_task->setGoalOrientation(robot->rotationInWorld(link_name));
 			}
 			else {
-				// compute haptic control
-				haptic_input.robot_position = robot->positionInWorld(link_name);
-				haptic_input.robot_orientation = robot->rotationInWorld(link_name);
-				haptic_input.robot_linear_velocity =
-					robot->linearVelocityInWorld(link_name);
-				haptic_input.robot_angular_velocity =
-					robot->angularVelocityInWorld(link_name);
-				haptic_input.robot_sensed_force =
-					motion_force_task->getSensedForceControlWorldFrame();
-				haptic_input.robot_sensed_moment =
-					motion_force_task->getSensedMomentControlWorldFrame();
 
-				haptic_output = haptic_controller->computeHapticControl(haptic_input);
+				if (key_board_only) {
+					motion_force_task->setGoalPosition(
+						robot->positionInWorld(link_name) + delta_xyz
+						);
+				motion_force_task->setGoalOrientation(robot->rotationInWorld(link_name));
+				} else {
+					// compute haptic control
+					haptic_input.robot_position = robot->positionInWorld(link_name);
+					haptic_input.robot_orientation = robot->rotationInWorld(link_name);
+					haptic_input.robot_linear_velocity =
+						robot->linearVelocityInWorld(link_name);
+					haptic_input.robot_angular_velocity =
+						robot->angularVelocityInWorld(link_name);
+					haptic_input.robot_sensed_force =
+						motion_force_task->getSensedForceControlWorldFrame();
+					haptic_input.robot_sensed_moment =
+						motion_force_task->getSensedMomentControlWorldFrame();
 
-				motion_force_task->setGoalPosition(haptic_output.robot_goal_position);
-				motion_force_task->setGoalOrientation(
-					haptic_output.robot_goal_orientation);
+					haptic_output = haptic_controller->computeHapticControl(haptic_input);
+
+					motion_force_task->setGoalPosition(haptic_output.robot_goal_position);
+					motion_force_task->setGoalOrientation(
+						haptic_output.robot_goal_orientation);
+				}
+
 				redis_client.sendAllFromGroup();
+
 			}
 
-			// redis_client.sendAllFromGroup();
+			// lockers
 			{
 				lock_guard<mutex> lock(mtx);
 				robot_control_torques_2 = robot_controller->computeControlTorques();
