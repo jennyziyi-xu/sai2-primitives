@@ -36,8 +36,8 @@ map<int, bool> key_pressed = {
 	{GLFW_KEY_J, false}, // key added 
 	{GLFW_KEY_X, false},
 	{GLFW_KEY_C, false},
+	{GLFW_KEY_G, false},	// key added fore grasping!
 	{GLFW_KEY_V, false}
-
 };
 map<int, bool> key_was_pressed = key_pressed;
 
@@ -269,24 +269,23 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		// read haptic device state from redis
 		redis_client.receiveAllFromGroup();
 
-		// compute haptic control
-		haptic_input.robot_position = robot->positionInWorld(link_name);
-		haptic_input.robot_orientation = robot->rotationInWorld(link_name);
-		haptic_input.robot_linear_velocity =
-			robot->linearVelocityInWorld(link_name);
-		haptic_input.robot_angular_velocity =
-			robot->angularVelocityInWorld(link_name);
-		haptic_input.robot_sensed_force =
-			motion_force_task->getSensedForceControlWorldFrame();
-		haptic_input.robot_sensed_moment =
-			motion_force_task->getSensedMomentControlWorldFrame();
-
-		haptic_output = haptic_controller->computeHapticControl(haptic_input);
+		
 
 		// compute robot control
 		motion_force_task->updateSensedForceAndMoment(
 			sim->getSensedForce(robot_name, link_name),
 			sim->getSensedMoment(robot_name, link_name));
+		
+
+		// state machine for button presses
+		if (haptic_controller->getHapticControlType() ==
+				Sai2Primitives::HapticControlType::HOMING &&
+			haptic_controller->getHomed() && haptic_button_is_pressed) {
+			haptic_controller->setHapticControlType(
+				Sai2Primitives::HapticControlType::MOTION_MOTION);
+			haptic_controller->setDeviceControlGains(200.0, 15.0);
+			cout << "haptic device homed" << endl;
+		}
 
 		Vector3d delta_xyz = Vector3d::Zero();
 		if (key_pressed.at(GLFW_KEY_X)) 
@@ -303,23 +302,52 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 			delta_xyz = Vector3d(0., 0., -0.01);
 		}
 
-		if (key_pressed.at(GLFW_KEY_J) && !key_was_pressed.at(GLFW_KEY_J)) {
-			robot_1_is_under_control = !robot_1_is_under_control;
-			cout << "robot_1_is_under_control=" << robot_1_is_under_control << endl;
+		if (key_pressed.at(GLFW_KEY_G) && !key_was_pressed.at(GLFW_KEY_G)) 
+		{
+			cout << "Key G is pressed -- You just changed the gripper status" << endl;
+		} 
+		// else {
+		// 	cout << "If you press Key G -- You will be able to change the gripper status" << endl;
+		// }
+
+
+		if (robot_name == robot_name_1) {
+			if (key_pressed.at(GLFW_KEY_J) && !key_was_pressed.at(GLFW_KEY_J)) 
+			{
+				robot_1_is_under_control = !robot_1_is_under_control;
+				cout << "robot_1_is_under_control=" << robot_1_is_under_control << endl;
+			}
 		}
 
 		if (robot_name == robot_name_1) {
-			
+
 			if (!robot_1_is_under_control) {
-				delta_xyz = Vector3d::Zero();
+				motion_force_task->setGoalPosition(
+						robot->positionInWorld(link_name)
+						);
+				motion_force_task->setGoalOrientation(robot->rotationInWorld(link_name));
 			}
+			else {
+				// compute haptic control
+				haptic_input.robot_position = robot->positionInWorld(link_name);
+				haptic_input.robot_orientation = robot->rotationInWorld(link_name);
+				haptic_input.robot_linear_velocity =
+					robot->linearVelocityInWorld(link_name);
+				haptic_input.robot_angular_velocity =
+					robot->angularVelocityInWorld(link_name);
+				haptic_input.robot_sensed_force =
+					motion_force_task->getSensedForceControlWorldFrame();
+				haptic_input.robot_sensed_moment =
+					motion_force_task->getSensedMomentControlWorldFrame();
 
-			motion_force_task->setGoalPosition(
-					robot->positionInWorld(link_name)+delta_xyz
-					);
-			motion_force_task->setGoalOrientation(robot->rotationInWorld(link_name));
+				haptic_output = haptic_controller->computeHapticControl(haptic_input);
 
-			redis_client.sendAllFromGroup();
+				motion_force_task->setGoalPosition(haptic_output.robot_goal_position);
+				motion_force_task->setGoalOrientation(
+					haptic_output.robot_goal_orientation);
+				redis_client.sendAllFromGroup();
+			}
+			// redis_client.sendAllFromGroup();
 			{
 				lock_guard<mutex> lock(mtx);
 				robot_control_torques = robot_controller->computeControlTorques();
@@ -328,35 +356,46 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		} else if (robot_name == robot_name_2) {
 
 			if (robot_1_is_under_control) {
-				delta_xyz = Vector3d::Zero();
+				motion_force_task->setGoalPosition(
+						robot->positionInWorld(link_name)
+						);
+				motion_force_task->setGoalOrientation(robot->rotationInWorld(link_name));
+			}
+			else {
+				// compute haptic control
+				haptic_input.robot_position = robot->positionInWorld(link_name);
+				haptic_input.robot_orientation = robot->rotationInWorld(link_name);
+				haptic_input.robot_linear_velocity =
+					robot->linearVelocityInWorld(link_name);
+				haptic_input.robot_angular_velocity =
+					robot->angularVelocityInWorld(link_name);
+				haptic_input.robot_sensed_force =
+					motion_force_task->getSensedForceControlWorldFrame();
+				haptic_input.robot_sensed_moment =
+					motion_force_task->getSensedMomentControlWorldFrame();
+
+				haptic_output = haptic_controller->computeHapticControl(haptic_input);
+
+				motion_force_task->setGoalPosition(haptic_output.robot_goal_position);
+				motion_force_task->setGoalOrientation(
+					haptic_output.robot_goal_orientation);
+				redis_client.sendAllFromGroup();
 			}
 
-			motion_force_task->setGoalPosition(
-					robot->positionInWorld(link_name)+delta_xyz
-					);
-			motion_force_task->setGoalOrientation(robot->rotationInWorld(link_name));
-
-			redis_client.sendAllFromGroup();
+			// redis_client.sendAllFromGroup();
 			{
 				lock_guard<mutex> lock(mtx);
 				robot_control_torques_2 = robot_controller->computeControlTorques();
 			}
 		}
 
+		// cout << "haptic_input.robot_position " << haptic_input.robot_position.transpose() << endl;
+
 		// compute POPC
 		auto POPC_force_moment =
 			POPC_teleop->computeAdditionalHapticDampingForce();
 		haptic_output.device_command_force += POPC_force_moment.first;
 
-		// state machine for button presses
-		if (haptic_controller->getHapticControlType() ==
-				Sai2Primitives::HapticControlType::HOMING &&
-			haptic_controller->getHomed() && haptic_button_is_pressed) {
-			haptic_controller->setHapticControlType(
-				Sai2Primitives::HapticControlType::MOTION_MOTION);
-			haptic_controller->setDeviceControlGains(200.0, 15.0);
-			cout << "haptic device homed" << endl;
-		}
 
 		if (haptic_controller->getHapticControlType() ==
 				Sai2Primitives::HapticControlType::MOTION_MOTION &&
