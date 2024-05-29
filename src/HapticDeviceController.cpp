@@ -243,12 +243,13 @@ HapticControllerOtuput HapticDeviceController::computeHomingControl(
 			(input.device_angular_velocity - desired_velocity);
 	}
 
+	// NOTE: Increase the threadhold for inaccurate novint falcon
 	if ((input.device_position - _device_home_pose.translation()).norm() <
-			0.001 &&
-		input.device_linear_velocity.norm() < 0.01 &&
+			1 &&
+		input.device_linear_velocity.norm() < 1 &&
 		(!_orientation_teleop_enabled ||
-		 orientation_error.norm() < 0.01 &&
-			 input.device_angular_velocity.norm() < 0.1)) {
+		 orientation_error.norm() < 1 &&
+			 input.device_angular_velocity.norm() < 1)) {
 		_device_homed = true;
 	}
 
