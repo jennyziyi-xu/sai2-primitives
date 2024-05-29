@@ -52,3 +52,5 @@ add_subdirectory(17-bilateral_teleop_with_POPC)
 add_subdirectory(18-panda_singularity)
 add_subdirectory(19-puma_singularity)
 add_subdirectory(20-dual_arms)
+add_subdirectory(21-dual_arms_keyboard)
+
