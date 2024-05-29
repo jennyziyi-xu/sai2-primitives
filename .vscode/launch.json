@@ -1,0 +1,32 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "ex_20",
+            "program": "${workspaceFolder}/build/examples/20-dual_arms/20-dual_arms",
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "ex_21",
+            "program": "${workspaceFolder}/build/examples/21-dual_arms_keyboard/21-dual_arms_keyboard",
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        // {
+        //     "type": "lldb",
+        //     "request": "launch",
+        //     "name": "ex_09",
+        //     "program": "${workspaceFolder}/build/examples/09-3d_position_force_controller/09-3d_position_force_controller",
+        //     "args": [],
+        //     "cwd": "${workspaceFolder}"
+        // },
+    ]
+}

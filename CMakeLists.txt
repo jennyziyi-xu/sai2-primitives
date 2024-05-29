@@ -8,15 +8,30 @@ if(${CMAKE_SYSTEM_NAME} MATCHES Darwin)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/opt/homebrew/include")
 endif()
 
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  message(STATUS "Setting build type to 'Release' as none was specified.")
+# if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+#   message(STATUS "Setting build type to 'Release' as none was specified.")
 
-  set(CMAKE_BUILD_TYPE
-      Release
-      CACHE STRING "Choose the type of build." FORCE)
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
-                                               "MinSizeRel" "RelWithDebInfo")
-endif()
+#   set(CMAKE_BUILD_TYPE
+#       Debug
+#       CACHE STRING "Choose the type of build." FORCE)
+#   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
+#                                                "MinSizeRel" "RelWithDebInfo")
+# endif()
+
+# Directly set the build type to Debug
+set(CMAKE_BUILD_TYPE Debug)
+
+# Sed the build type to Debug + save to cache
+# set(CMAKE_BUILD_TYPE
+#     Debug
+#     CACHE STRING "Choose the type of build." FORCE)
+# set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
+#                                               "MinSizeRel" "RelWithDebInfo")
+
+message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+message(STATUS "CMAKE_CONFIGURATION_TYPES: ${CMAKE_CONFIGURATION_TYPES}")
+
+
 
 # include Eigen
 find_package(Eigen3 REQUIRED)
