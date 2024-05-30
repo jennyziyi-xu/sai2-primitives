@@ -88,6 +88,7 @@ bool key_board_only = true;
 // How to switch between the two robots
 // bool keep_pressing_B_to_switch = true;
 bool keep_pressing_B_to_switch = false;
+Vector6d UI_torques = Eigen::VectorXd::Zero(6);
 
 int main() {
 	Sai2Model::URDF_FOLDERS["EXAMPLE_21_FOLDER"] =
@@ -108,11 +109,14 @@ int main() {
 								 55.0);
 	sim->addSimulatedForceSensor(robot_name_2, link_name, Affine3d::Identity(),
 								55.0);
-	sim->setCoeffFrictionStatic(0.0);
+	sim->setCoeffFrictionStatic(10.0);
 
 	// load graphics scene
 	auto graphics = make_shared<Sai2Graphics::Sai2Graphics>(world_file);
 	graphics->addForceSensorDisplay(sim->getAllForceSensorData()[0]);
+	for (const auto& object_name : sim->getObjectNames()) {
+		graphics->addUIForceInteraction(object_name);
+	}
 
 	// load robot
 	// [1] for robot_name_1
@@ -157,6 +161,18 @@ int main() {
 
 		graphics->updateRobotGraphics(robot_name_2, sim->getJointPositions(robot_name_2));
 		graphics->updateRobotGraphics(robot_name_1, sim->getJointPositions(robot_name_1));	
+
+
+		UI_torques = graphics->getUITorques("Box1");
+		// graphics->updateObjectGraphics("Box1",
+		// 								   sim->getObjectPose("Box1"),
+		// 								   sim->getObjectVelocity("Box1"));
+		for (const auto& object_name : sim->getObjectNames()) {
+			graphics->updateObjectGraphics(object_name,
+										   sim->getObjectPose(object_name),
+										   sim->getObjectVelocity(object_name));
+		}
+
 		
 
 		graphics->updateDisplayedForceSensor(sim->getAllForceSensorData()[0]);
@@ -182,8 +198,15 @@ void runSim(shared_ptr<Sai2Simulation::Sai2Simulation> sim) {
 
 	fSimulationRunning = true;
 
+
 	while (fSimulationRunning) {
 		simTimer.waitForNextLoop();
+
+		// for (const auto& object_name : sim->getObjectNames()) {
+		// 	sim->setObjectForceTorque(object_name,
+		// 							  graphics->getUITorques(object_name));
+		// }
+		// // sim->integrate();
 
 		{
 			lock_guard<mutex> lock(mtx);
@@ -194,7 +217,14 @@ void runSim(shared_ptr<Sai2Simulation::Sai2Simulation> sim) {
 			lock_guard<mutex> lock(mtx);
 			sim->setJointTorques(robot_name_2, robot_control_torques_2);
 		}
+
+		sim->setObjectForceTorque("Box1",
+									  UI_torques);
+
+		// cout << "---" << UI_torques << endl;
 		sim->integrate();
+
+		
 		
 	}
 
@@ -252,8 +282,9 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		gripper_2_is_open = true;
 	}
 
-	motion_force_task->disableInternalOtg();
+	// motion_force_task->disableInternalOtg();
 	motion_force_task->enableVelocitySaturation(0.9, M_PI);
+	motion_force_task->setPosControlGains(400, 40, 0);
 	motion_force_task->setOriControlGains(200.0, 25.0);
 	Vector3d prev_sensed_force = Vector3d::Zero();
 
