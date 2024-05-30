@@ -35,14 +35,14 @@ map<int, bool> key_pressed = {
 	{GLFW_KEY_G, false},	// key to change grasping status
 
 	// Translation Keys
-	{GLFW_KEY_Q, false},	// MOVING up (Z-positive direction)
-	{GLFW_KEY_W, false},	// MOVING down (Z-negative direction)
+	{GLFW_KEY_Q, false},	// MOVING up (Z-positive direction)   up
+	{GLFW_KEY_W, false},	// MOVING down (Z-negative direction)  down
 
-	{GLFW_KEY_E, false},	// MOVING in Y-positive direction
-	{GLFW_KEY_R, false},	// MOVING in Y-negative direction
+	{GLFW_KEY_E, false},	// MOVING in Y-positive direction   right 
+	{GLFW_KEY_R, false},	// MOVING in Y-negative direction   left 
 
-	{GLFW_KEY_X, false},	// MOVING in X-positive direction
-	{GLFW_KEY_C, false},	// MOVING in X-negative direction
+	{GLFW_KEY_X, false},	// MOVING in X-positive direction   front 
+	{GLFW_KEY_C, false},	// MOVING in X-negative direction   back 
 
 	// Rotation Keys
 	{GLFW_KEY_J, false},	// Rot CCW about X-axis
@@ -50,6 +50,9 @@ map<int, bool> key_pressed = {
 	
 	{GLFW_KEY_I, false},	// Rot CCW about Y-axis
 	{GLFW_KEY_K, false},	// Rot CW about Y-axis
+
+	{GLFW_KEY_N, false},	// Rot CCW about Z-axis
+	{GLFW_KEY_M, false},	// Rot CW about Z-axis
 };
 
 map<int, bool> key_was_pressed = key_pressed;
@@ -221,7 +224,6 @@ void runSim(shared_ptr<Sai2Simulation::Sai2Simulation> sim) {
 		sim->setObjectForceTorque("Box1",
 									  UI_torques);
 
-		// cout << "---" << UI_torques << endl;
 		sim->integrate();
 
 		
@@ -446,14 +448,34 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 				cur_orientation;
 		}
 
+		// rotate about Z-axis
+		if (key_pressed.at(GLFW_KEY_N)) 
+		{
+			cout << "Key N is pressed -- Rot CCW about Z-axis " << endl;
+			goal_orientation =
+				AngleAxisd( + M_PI / 3.0, Vector3d::UnitZ()).toRotationMatrix() *
+				cur_orientation;
+		} else if (key_pressed.at(GLFW_KEY_M))
+		{
+			cout << "Key M is pressed -- Rot CW about Z-axis " << endl;
+
+			goal_orientation =
+				AngleAxisd( - M_PI / 3.0, Vector3d::UnitZ()).toRotationMatrix() *
+				cur_orientation;
+		}
+
 		// Change grasping status
-		if (robot_name == robot_name_1) {
-			if (key_pressed.at(GLFW_KEY_G)) {gripper_1_is_open=false;}
-			else {gripper_1_is_open=true;}
+		if (robot_name == robot_name_1 && robot_1_is_under_control) {
+			if (key_pressed.at(GLFW_KEY_G) && !key_was_pressed.at(GLFW_KEY_G)){
+				cout << "Key G is pressed - changing grasping status Robot 1" << endl;
+				gripper_1_is_open = !gripper_1_is_open;
+			} 
 		} 
-		if (robot_name == robot_name_2) {
-			if (key_pressed.at(GLFW_KEY_G)) {gripper_2_is_open=false;}
-			else {gripper_2_is_open=true;}
+		if (robot_name == robot_name_2 && !robot_1_is_under_control) {
+			if (key_pressed.at(GLFW_KEY_G) && !key_was_pressed.at(GLFW_KEY_G)){
+				cout << "Key G is pressed - changing grasping status Robot 2" << endl;
+				gripper_2_is_open = !gripper_2_is_open;
+			}
 		}
 
 		// Switch between the two robots
@@ -464,6 +486,7 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 			}
 		} else {
 			if (key_pressed.at(GLFW_KEY_B) && !key_was_pressed.at(GLFW_KEY_B)) {
+				cout << "Key B is pressed -- switching robot" << endl;
 				if (robot_1_is_under_control) {robot_1_is_under_control=false;}
 				else {robot_1_is_under_control=true;}
 			}
