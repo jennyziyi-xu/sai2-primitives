@@ -479,16 +479,16 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		}
 
 		// Switch between the two robots
-		if (keep_pressing_B_to_switch) {
-			if (robot_name == robot_name_1) {
-				if (key_pressed.at(GLFW_KEY_B)) {robot_1_is_under_control = false;}
-				else {robot_1_is_under_control = true;}
-			}
-		} else {
-			if (key_pressed.at(GLFW_KEY_B) && !key_was_pressed.at(GLFW_KEY_B)) {
-				cout << "Key B is pressed -- switching robot" << endl;
-				if (robot_1_is_under_control) {robot_1_is_under_control=false;}
-				else {robot_1_is_under_control=true;}
+		if (robot_name == robot_name_1 && robot_1_is_under_control) {
+			if (key_pressed.at(GLFW_KEY_B) && !key_was_pressed.at(GLFW_KEY_B)){
+				cout << "Key B is pressed - switching Robot " << endl;
+				robot_1_is_under_control = !robot_1_is_under_control;
+			} 
+		} 
+		if (robot_name == robot_name_2 && !robot_1_is_under_control) {
+			if (key_pressed.at(GLFW_KEY_B) && !key_was_pressed.at(GLFW_KEY_B)){
+				cout << "Key B is pressed - changing Robot" << endl;
+				robot_1_is_under_control = !robot_1_is_under_control;
 			}
 		}
 
