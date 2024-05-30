@@ -284,7 +284,7 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		gripper_2_is_open = true;
 	}
 
-	// motion_force_task->disableInternalOtg();
+	motion_force_task->disableInternalOtg();
 	motion_force_task->enableVelocitySaturation(0.9, M_PI);
 	motion_force_task->setPosControlGains(400, 40, 0);
 	motion_force_task->setOriControlGains(200.0, 25.0);
