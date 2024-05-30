@@ -1,16 +1,16 @@
 <?xml version="1.0" ?>
 
-<world name="demo_world" gravity="0.0 0.0 0.0">
+<world name="demo_world" gravity="0.0 0.0 -0.1">
 
 	<robot name="PANDA">
-		<!-- <model dir="${EXAMPLE_21_FOLDER}/panda" path="panda_arm_with_gripper.urdf" name="panda_arm_with_gripper" /> -->
-		<model dir="${EXAMPLE_21_FOLDER}/panda" path="panda_arm_hand.urdf" name="panda_arm_hand" />
+		<model dir="${EXAMPLE_21_FOLDER}/panda" path="panda_arm_with_gripper.urdf" name="panda_arm_with_gripper" />
+		<!-- <model dir="${EXAMPLE_21_FOLDER}/panda" path="panda_arm_hand.urdf" name="panda_arm_hand" /> -->
 		<origin xyz="0.0 -0.3 0.0" rpy="0 0 0" />
 	</robot>
 
 	<robot name="PANDA2">
-		<!-- <model dir="${EXAMPLE_21_FOLDER}/panda" path="panda_arm_with_gripper.urdf" name="panda_arm_with_gripper" /> -->
-		<model dir="${EXAMPLE_21_FOLDER}/panda" path="panda_arm_hand.urdf" name="panda_arm_hand" />
+		<model dir="${EXAMPLE_21_FOLDER}/panda" path="panda_arm_with_gripper.urdf" name="panda_arm_with_gripper" />
+		<!-- <model dir="${EXAMPLE_21_FOLDER}/panda" path="panda_arm_hand.urdf" name="panda_arm_hand" /> -->
 		<origin xyz="0.0 0.3 0.0" rpy="0 0 0" />
 	</robot>
 
@@ -33,28 +33,7 @@
 		</visual>
 	</static_object>
 
-	<static_object name="Plane">
-		<origin xyz="0.4 0.0 0.22" rpy="0.0 0.0 0.0" />
-		<collision>
-			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
-			<geometry>
-				<!-- <box size="0.3 0.5 0.04" /> -->
-				<box size="1.3 1.5 0.04" /> 
-			</geometry>
-		</collision>
-		<visual>
-			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
-			<geometry>
-				<!-- <box size="0.3 0.5 0.04" /> -->
-				<box size="1.3 1.5 0.04" /> 
-			</geometry>
-			<material name="material_orange">
-				<color rgba="1.00 0.60 0.20 1.0" />
-			</material>
-		</visual>
-	</static_object>
-
-	<static_object name="Box">
+	<!-- <static_object name="Box">
 		<origin xyz="0.33 0.17 0.27" rpy="0.0 0.0 0.0" />
 		<collision>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
@@ -71,7 +50,78 @@
 				<color rgba="0.20 0.47 1.00 1.0" />
 			</material>
 		</visual>
-	</static_object>
+	</static_object> -->
+
+	<!-- <static_object name="Counter">
+		<origin xyz="0.7 0.0 0.5" rpy="0.0 0.0 0.0" />
+		<collision>
+			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+			<geometry>
+				<box size="0.5 0.5 0.06" />
+			</geometry>
+		</collision>
+		<visual>
+			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+			<geometry>
+				<box size="0.5 0.5 0.06" />
+			</geometry>
+			<material name="material_blue">
+				<color rgba="0.20 0.47 1.00 1.0" />
+			</material>
+		</visual>
+	</static_object> -->
+
+	<dynamic_object name="Box1">
+	<!-- <static_object name="Box1"> -->
+		<origin xyz="0.33 0.27 0.27" rpy="0.0 0.0 0.0" />
+		<inertial>
+			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+			<mass value="1" />
+			<inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0" />
+		</inertial>
+		<collision>
+			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+			<geometry>
+				<box size="0.1 0.05 0.17" />
+			</geometry>
+		</collision>
+		<visual>
+			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+			<geometry>
+				<box size="0.1 0.05 0.17" />
+			</geometry>
+			<material name="material_green">
+				<color rgba="0.1 0.6 0.1 1.0" />
+			</material>
+		</visual>
+	</dynamic_object>
+
+
+
+	<dynamic_object name="Box2">
+		<origin xyz="0.33 -0.27 0.27" rpy="0.0 0.0 0.0" />
+		<inertial>
+			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+			<mass value="1" />
+			<inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0" />
+		</inertial>
+		<collision>
+			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+			<geometry>
+				<box size="0.1 0.05 0.17" />
+			</geometry>
+		</collision>
+		<visual>
+			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+			<geometry>
+				<box size="0.1 0.05 0.17" />
+			</geometry>
+			<material name="material_green">
+				<color rgba="0.1 0.6 0.1 1.0" />
+			</material>
+		</visual>
+	</dynamic_object>
+	<!-- </static_object> -->
 
 	<light name="light1" type="directional">
 		<position xyz="-2.0 -2.0 2.0" />
