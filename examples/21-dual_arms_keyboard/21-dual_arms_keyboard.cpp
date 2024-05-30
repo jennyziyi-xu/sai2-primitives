@@ -284,7 +284,7 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		gripper_2_is_open = true;
 	}
 
-	// motion_force_task->disableInternalOtg();
+	motion_force_task->disableInternalOtg();
 	motion_force_task->enableVelocitySaturation(0.9, M_PI);
 	motion_force_task->setPosControlGains(400, 40, 0);
 	motion_force_task->setOriControlGains(200.0, 25.0);
@@ -495,12 +495,7 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		if (robot_name == robot_name_1) {
 
 			if (!robot_1_is_under_control) {
-				motion_force_task->setGoalPosition(
-						robot->positionInWorld(link_name)
-						);
-				motion_force_task->setGoalOrientation(
-					robot->rotationInWorld(link_name)
-					);
+				motion_force_task->reInitializeTask();
 			}
 			else {
 				// Grasping control
@@ -550,12 +545,7 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		} else if (robot_name == robot_name_2) {
 
 			if (robot_1_is_under_control) {
-				motion_force_task->setGoalPosition(
-						robot->positionInWorld(link_name)
-						);
-				motion_force_task->setGoalOrientation(
-					robot->rotationInWorld(link_name)
-					);
+				motion_force_task->reInitializeTask();
 			}
 			else {
 				
