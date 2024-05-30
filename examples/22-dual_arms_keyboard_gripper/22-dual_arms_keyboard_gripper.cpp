@@ -4,6 +4,7 @@
 #include <mutex>
 #include <string>
 
+#include "Sai2Model.h"
 #include "Sai2Graphics.h"
 #include "Sai2Primitives.h"
 #include "Sai2Simulation.h"
@@ -18,12 +19,10 @@ using namespace Eigen;
 using namespace Sai2Common::ChaiHapticDriverKeys;
 
 namespace {
-const string world_file = "${EXAMPLE_21_FOLDER}/world_with_gripper.urdf";
-const string robot_file = "${EXAMPLE_21_FOLDER}/panda/panda_arm_with_gripper.urdf";
-
+const string world_file = "/home/harrison/stanford/OpenSai/cs225a/project_starter/22-dual_arms_keyboard_gripper/world.urdf";
+const string robot_file = "/home/harrison/stanford/OpenSai/cs225a/urdf_models/panda/panda_arm_hand.urdf";
 const string robot_name_1 = "PANDA";
 const string robot_name_2 = "PANDA2";
-// const string link_name = "end-effector";
 const string link_name = "link7";
 
 // mutex for control torques
@@ -31,30 +30,16 @@ mutex mtx;
 
 // map of flags for key presses
 map<int, bool> key_pressed = {
-	{GLFW_KEY_B, false}, // key to swith robots
-	{GLFW_KEY_G, false},	// key to change grasping status
-
-	// Translation Keys
-	{GLFW_KEY_Q, false},	// MOVING up (Z-positive direction)   up
-	{GLFW_KEY_W, false},	// MOVING down (Z-negative direction)  down
-
-	{GLFW_KEY_E, false},	// MOVING in Y-positive direction   right 
-	{GLFW_KEY_R, false},	// MOVING in Y-negative direction   left 
-
-	{GLFW_KEY_X, false},	// MOVING in X-positive direction   front 
-	{GLFW_KEY_C, false},	// MOVING in X-negative direction   back 
-
-	// Rotation Keys
-	{GLFW_KEY_J, false},	// Rot CCW about X-axis
-	{GLFW_KEY_L, false},	// Rot CW about X-axis
-	
-	{GLFW_KEY_I, false},	// Rot CCW about Y-axis
-	{GLFW_KEY_K, false},	// Rot CW about Y-axis
-
-	{GLFW_KEY_N, false},	// Rot CCW about Z-axis
-	{GLFW_KEY_M, false},	// Rot CW about Z-axis
+	{GLFW_KEY_P, false},
+	{GLFW_KEY_L, false},
+	{GLFW_KEY_W, false},
+	{GLFW_KEY_O, false},
+	{GLFW_KEY_J, false}, // key added 
+	{GLFW_KEY_X, false},
+	{GLFW_KEY_C, false},
+	{GLFW_KEY_G, false},	// key added fore grasping!
+	{GLFW_KEY_V, false}
 };
-
 map<int, bool> key_was_pressed = key_pressed;
 
 }  // namespace
@@ -66,41 +51,17 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 				const string robot_name
 );
 
+// robot joint data
 VectorXd robot_control_torques = Eigen::VectorXd::Zero(9);
 VectorXd robot_control_torques_2 = Eigen::VectorXd::Zero(9);
-
-// Vector2d gripper_goal_open = Vector2d(0.02, -0.02);
-Vector2d gripper_goal_open = Vector2d(0.05, -0.05);
-
-Vector2d gripper_goal_closed = Vector2d(0.0, 0.0);
-
-double kp_gripper = 1e3;
-double kv_gripper = 1e2;
-
-// double kp_gripper = 5e3;
-// double kv_gripper = 1e2;
-
-bool gripper_1_is_open = true;
-bool gripper_2_is_open = true;
-
 bool robot_1_is_under_control = true;
 
 bool key_board_only = true;
-// bool key_board_only = false;
 
-// How to switch between the two robots
-// bool keep_pressing_B_to_switch = true;
-bool keep_pressing_B_to_switch = false;
-Vector6d UI_torques = Eigen::VectorXd::Zero(6);
 
 int main() {
-	Sai2Model::URDF_FOLDERS["EXAMPLE_21_FOLDER"] =
-		string(EXAMPLES_FOLDER) + "/21-dual_arms_keyboard";
-	
-	cout << "Loading URDF world model file: "
-		 << Sai2Model::ReplaceUrdfPathPrefix(world_file) << endl;
-	cout << string(EXAMPLES_FOLDER) + "/21-dual_arms_keyboard" << endl;
-	
+	Sai2Model::URDF_FOLDERS["EXAMPLE_20_FOLDER"] =
+		string(EXAMPLES_FOLDER) + "/20-dual_arms";
 	// set up signal handler
 	signal(SIGABRT, &sighandler);
 	signal(SIGTERM, &sighandler);
@@ -112,14 +73,11 @@ int main() {
 								 55.0);
 	sim->addSimulatedForceSensor(robot_name_2, link_name, Affine3d::Identity(),
 								55.0);
-	sim->setCoeffFrictionStatic(10.0);
+	sim->setCoeffFrictionStatic(0.0);
 
 	// load graphics scene
 	auto graphics = make_shared<Sai2Graphics::Sai2Graphics>(world_file);
 	graphics->addForceSensorDisplay(sim->getAllForceSensorData()[0]);
-	for (const auto& object_name : sim->getObjectNames()) {
-		graphics->addUIForceInteraction(object_name);
-	}
 
 	// load robot
 	// [1] for robot_name_1
@@ -156,7 +114,7 @@ int main() {
 			key_pressed[key.first] = graphics->isKeyPressed(key.first);
 		}
 
-		// if (key_pressed.at(GLFW_KEY_B)) {
+		// if (key_pressed.at(GLFW_KEY_J)) {
 		// 	graphics->updateRobotGraphics(robot_name_2, sim->getJointPositions(robot_name_2));
 		// } else {
 		// 	graphics->updateRobotGraphics(robot_name_1, sim->getJointPositions(robot_name_1));	
@@ -164,18 +122,6 @@ int main() {
 
 		graphics->updateRobotGraphics(robot_name_2, sim->getJointPositions(robot_name_2));
 		graphics->updateRobotGraphics(robot_name_1, sim->getJointPositions(robot_name_1));	
-
-
-		UI_torques = graphics->getUITorques("Box1");
-		// graphics->updateObjectGraphics("Box1",
-		// 								   sim->getObjectPose("Box1"),
-		// 								   sim->getObjectVelocity("Box1"));
-		for (const auto& object_name : sim->getObjectNames()) {
-			graphics->updateObjectGraphics(object_name,
-										   sim->getObjectPose(object_name),
-										   sim->getObjectVelocity(object_name));
-		}
-
 		
 
 		graphics->updateDisplayedForceSensor(sim->getAllForceSensorData()[0]);
@@ -199,19 +145,10 @@ void runSim(shared_ptr<Sai2Simulation::Sai2Simulation> sim) {
 	// create a timer
 	Sai2Common::LoopTimer simTimer(1.0 / sim->timestep(), 1e6);
 
-	sim->enableGravityCompensation(true);
-
 	fSimulationRunning = true;
-
 
 	while (fSimulationRunning) {
 		simTimer.waitForNextLoop();
-
-		// for (const auto& object_name : sim->getObjectNames()) {
-		// 	sim->setObjectForceTorque(object_name,
-		// 							  graphics->getUITorques(object_name));
-		// }
-		// // sim->integrate();
 
 		{
 			lock_guard<mutex> lock(mtx);
@@ -222,13 +159,7 @@ void runSim(shared_ptr<Sai2Simulation::Sai2Simulation> sim) {
 			lock_guard<mutex> lock(mtx);
 			sim->setJointTorques(robot_name_2, robot_control_torques_2);
 		}
-
-		sim->setObjectForceTorque("Box1",
-									  UI_torques);
-
 		sim->integrate();
-
-		
 		
 	}
 
@@ -263,33 +194,12 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 			"control of the robot."
 		 << endl;
 
-	// create robot controller -- 6Dof Action
+	// create robot controller
 	Affine3d compliant_frame = Affine3d::Identity();
 	auto motion_force_task = make_shared<Sai2Primitives::MotionForceTask>(
-		robot, 
-		link_name, 
-		compliant_frame
-	);
-
-	// create gripper task -- 2Dof Action
-	MatrixXd gripper_selection_matrix = MatrixXd::Zero(2, robot->dof());
-	gripper_selection_matrix(0, 7) = 1;
-	gripper_selection_matrix(1, 8) = 1;
-	auto gripper_task = make_shared<Sai2Primitives::JointTask>(robot, gripper_selection_matrix);
-	gripper_task->setDynamicDecouplingType(Sai2Primitives::DynamicDecouplingType::IMPEDANCE);
-	
-	gripper_task->setGains(kp_gripper, kv_gripper, 0);
-	gripper_task->disableInternalOtg();
-	gripper_task->setGoalPosition(gripper_goal_open);
-	if (robot_name == robot_name_1) {
-		gripper_1_is_open = true;
-	} else if (robot_name == robot_name_2) {
-		gripper_2_is_open = true;
-	}
-
+		robot, link_name, compliant_frame);
 	motion_force_task->disableInternalOtg();
 	motion_force_task->enableVelocitySaturation(0.9, M_PI);
-	motion_force_task->setPosControlGains(400, 40, 0);
 	motion_force_task->setOriControlGains(200.0, 25.0);
 	Vector3d prev_sensed_force = Vector3d::Zero();
 
@@ -297,6 +207,19 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		motion_force_task};
 	auto robot_controller =
 		make_unique<Sai2Primitives::RobotController>(robot, task_list);
+
+	// new
+	MatrixXd gripper_selection_matrix = MatrixXd::Zero(2, robot->dof());
+	gripper_selection_matrix(0, 7) = 1;
+	gripper_selection_matrix(1, 8) = 1;
+	auto gripper_task = make_shared<Sai2Primitives::JointTask>(robot, gripper_selection_matrix);
+	gripper_task->setDynamicDecouplingType(Sai2Primitives::DynamicDecouplingType::IMPEDANCE);
+	double kp_gripper = 5e3;
+	double kv_gripper = 1e2;
+	gripper_task->setGains(kp_gripper, kv_gripper, 0);
+	Vector2d gripper_goal_open = Vector2d(0.02, -0.02);
+	Vector2d gripper_goal_closed = Vector2d(0.0, 0.0);
+	gripper_task->setGoalPosition(gripper_goal_open);
 
 	// create haptic controller
 	Sai2Primitives::HapticDeviceController::DeviceLimits device_limits(
@@ -381,135 +304,66 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		}
 
 		Vector3d delta_xyz = Vector3d::Zero();
-
-		// initial orientation
-		Matrix3d cur_orientation = robot->rotationInWorld(link_name);
-		Matrix3d goal_orientation = cur_orientation;
-
-		// Move in Z direction
-		if (key_pressed.at(GLFW_KEY_Q)) 
-		{
-			cout << "Key Q is pressed -- MOVING up (Z-positive direction)" << endl;
-			delta_xyz = 0.01 * Vector3d::UnitZ();
-		} else if (key_pressed.at(GLFW_KEY_W))
-		{
-			cout << "Key W is pressed -- MOVING down (Z-negative direction)" << endl;
-			delta_xyz = -0.01 * Vector3d::UnitZ();
-		}
-
-		// Move in Y direction
-		if (key_pressed.at(GLFW_KEY_E)) 
-		{
-			cout << "Key E is pressed -- MOVING in Y-positive direction" << endl;
-			delta_xyz = 0.01 * Vector3d::UnitY();
-		} else if (key_pressed.at(GLFW_KEY_R))
-		{
-			cout << "Key R is pressed -- MOVING in Y-negative direction" << endl;
-			delta_xyz = -0.01 * Vector3d::UnitY();
-		}
-
-		// Move in Y direction
 		if (key_pressed.at(GLFW_KEY_X)) 
 		{
-			cout << "Key X is pressed -- MOVING in X-positive direction" << endl;
-			delta_xyz = 0.01 * Vector3d::UnitX();
+			cout << "Key X is pressed -- MOVING up" << endl;
+			delta_xyz = Vector3d(0.,0.,+0.01);
 		} else if (key_pressed.at(GLFW_KEY_C))
 		{
-			cout << "Key C is pressed -- MOVING in X-negative direction" << endl;
-			delta_xyz = -0.01 * Vector3d::UnitX();
+			cout << "Key C is pressed -- MOVING in y-negative direction" << endl;
+			delta_xyz = Vector3d(-0.01, 0., 0.);
+		}
+		else {
+			// cout << "No key is pressed -- MOVING down, Consider to move up by pressing X, or C to move in negative x-axis" << endl;
+			delta_xyz = Vector3d(0., 0., -0.01);
 		}
 
-
-		// rotate about X-axis
-		if (key_pressed.at(GLFW_KEY_J)) 
-		{
-			cout << "Key J is pressed -- Rot CCW about X-axis " << endl;
-			goal_orientation =
-				AngleAxisd( + M_PI / 3.0, Vector3d::UnitX()).toRotationMatrix() *
-				cur_orientation;
-		} else if (key_pressed.at(GLFW_KEY_L))
-		{
-			cout << "Key L is pressed -- Rot CW about X-axis " << endl;
-			goal_orientation =
-				AngleAxisd( - M_PI / 3.0, Vector3d::UnitX()).toRotationMatrix() *
-				cur_orientation;
+		// new
+		if (key_pressed.at(GLFW_KEY_G) && !key_was_pressed.at(GLFW_KEY_G)) {
+    		cout << "Key G is pressed -- Changing gripper status" << endl;
+    		if (robot_name == robot_name_1 && robot_1_is_under_control) {
+        		if (gripper_task->getGoalPosition() == gripper_goal_open) {
+            	gripper_task->setGoalPosition(gripper_goal_closed);
+        		} else {
+            		gripper_task->setGoalPosition(gripper_goal_open);
+        		}
+    		} else if (robot_name == robot_name_2 && !robot_1_is_under_control) {
+        		if (gripper_task->getGoalPosition() == gripper_goal_open) {
+            		gripper_task->setGoalPosition(gripper_goal_closed);
+        		} else {
+            	gripper_task->setGoalPosition(gripper_goal_open);
+        		}
+    		}
 		}
 
-		// rotate about Y-axis
-		if (key_pressed.at(GLFW_KEY_I)) 
-		{
-			cout << "Key I is pressed -- Rot CCW about Y-axis " << endl;
-			goal_orientation =
-				AngleAxisd( + M_PI / 3.0, Vector3d::UnitY()).toRotationMatrix() *
-				cur_orientation;
-		} else if (key_pressed.at(GLFW_KEY_K))
-		{
-			cout << "Key K is pressed -- Rot CW about Y-axis " << endl;
+ 
+		// else {
+		// 	cout << "If you press Key G -- You will be able to change the gripper status" << endl;
+		// }
 
-			goal_orientation =
-				AngleAxisd( - M_PI / 3.0, Vector3d::UnitY()).toRotationMatrix() *
-				cur_orientation;
-		}
 
-		// rotate about Z-axis
-		if (key_pressed.at(GLFW_KEY_N)) 
-		{
-			cout << "Key N is pressed -- Rot CCW about Z-axis " << endl;
-			goal_orientation =
-				AngleAxisd( + M_PI / 3.0, Vector3d::UnitZ()).toRotationMatrix() *
-				cur_orientation;
-		} else if (key_pressed.at(GLFW_KEY_M))
-		{
-			cout << "Key M is pressed -- Rot CW about Z-axis " << endl;
-
-			goal_orientation =
-				AngleAxisd( - M_PI / 3.0, Vector3d::UnitZ()).toRotationMatrix() *
-				cur_orientation;
-		}
-
-		// Change grasping status
 		if (robot_name == robot_name_1) {
-			if (key_pressed.at(GLFW_KEY_G)) {gripper_1_is_open=false;}
-			else {gripper_1_is_open=true;}
-		}
-
-		if (robot_name == robot_name_2) {
-			if (key_pressed.at(GLFW_KEY_G)) {gripper_2_is_open=false;}
-			else {gripper_2_is_open=true;}
-		}
-
-		// Switch between the two robots
-		if (robot_name == robot_name_1 && robot_1_is_under_control) {
-			if (key_pressed.at(GLFW_KEY_B) && !key_was_pressed.at(GLFW_KEY_B)){
-				cout << "Key B is pressed - switching Robot " << endl;
+			if (key_pressed.at(GLFW_KEY_J) && !key_was_pressed.at(GLFW_KEY_J)) 
+			{
 				robot_1_is_under_control = !robot_1_is_under_control;
-			} 
-		} 
-		if (robot_name == robot_name_2 && !robot_1_is_under_control) {
-			if (key_pressed.at(GLFW_KEY_B) && !key_was_pressed.at(GLFW_KEY_B)){
-				cout << "Key B is pressed - changing Robot" << endl;
-				robot_1_is_under_control = !robot_1_is_under_control;
+				cout << "robot_1_is_under_control=" << robot_1_is_under_control << endl;
 			}
 		}
 
 		if (robot_name == robot_name_1) {
 
 			if (!robot_1_is_under_control) {
-				motion_force_task->reInitializeTask();
+				motion_force_task->setGoalPosition(
+						robot->positionInWorld(link_name)
+						);
+				motion_force_task->setGoalOrientation(robot->rotationInWorld(link_name));
 			}
 			else {
-				// Grasping control
-				if (gripper_1_is_open) {gripper_task->setGoalPosition(gripper_goal_open);}
-				else {gripper_task->setGoalPosition(gripper_goal_closed);}
-
-				// 6Dof Control 
 				if (key_board_only) {
 					motion_force_task->setGoalPosition(
 						robot->positionInWorld(link_name) + delta_xyz
 						);
-					motion_force_task->setGoalOrientation(
-						goal_orientation
-						);
+					motion_force_task->setGoalOrientation(robot->rotationInWorld(link_name));
 				} else {
 					// compute haptic control
 					haptic_input.robot_position = robot->positionInWorld(link_name);
@@ -526,10 +380,8 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 					haptic_output = haptic_controller->computeHapticControl(haptic_input);
 
 					motion_force_task->setGoalPosition(haptic_output.robot_goal_position);
-					// motion_force_task->setGoalOrientation(
-					// 	haptic_output.robot_goal_orientation);
 					motion_force_task->setGoalOrientation(
-						goal_orientation);
+						haptic_output.robot_goal_orientation);
 				}
 
 				redis_client.sendAllFromGroup();
@@ -545,22 +397,18 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		} else if (robot_name == robot_name_2) {
 
 			if (robot_1_is_under_control) {
-				motion_force_task->reInitializeTask();
+				motion_force_task->setGoalPosition(
+						robot->positionInWorld(link_name)
+						);
+				motion_force_task->setGoalOrientation(robot->rotationInWorld(link_name));
 			}
 			else {
-				
-				// Grasping control
-				if (gripper_2_is_open) {gripper_task->setGoalPosition(gripper_goal_open);}
-				else {gripper_task->setGoalPosition(gripper_goal_closed);}
 
-				// 6Dof Control 
 				if (key_board_only) {
 					motion_force_task->setGoalPosition(
 						robot->positionInWorld(link_name) + delta_xyz
 						);
-					motion_force_task->setGoalOrientation(
-						goal_orientation
-						);
+				motion_force_task->setGoalOrientation(robot->rotationInWorld(link_name));
 				} else {
 					// compute haptic control
 					haptic_input.robot_position = robot->positionInWorld(link_name);
@@ -577,10 +425,8 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 					haptic_output = haptic_controller->computeHapticControl(haptic_input);
 
 					motion_force_task->setGoalPosition(haptic_output.robot_goal_position);
-					// motion_force_task->setGoalOrientation(
-					// 	haptic_output.robot_goal_orientation);
 					motion_force_task->setGoalOrientation(
-						goal_orientation);
+						haptic_output.robot_goal_orientation);
 				}
 
 				redis_client.sendAllFromGroup();
@@ -590,7 +436,7 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 			// lockers
 			{
 				lock_guard<mutex> lock(mtx);
-				robot_control_torques_2 = robot_controller->computeControlTorques() + gripper_task->computeTorques();
+				robot_control_torques_2 = robot_controller->computeControlTorques() + gripper_task->computeTorques();;
 			}
 		}
 
