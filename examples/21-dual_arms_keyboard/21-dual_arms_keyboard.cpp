@@ -199,6 +199,8 @@ void runSim(shared_ptr<Sai2Simulation::Sai2Simulation> sim) {
 	// create a timer
 	Sai2Common::LoopTimer simTimer(1.0 / sim->timestep(), 1e6);
 
+	sim->enableGravityCompensation(true);
+
 	fSimulationRunning = true;
 
 
@@ -465,17 +467,14 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		}
 
 		// Change grasping status
-		if (robot_name == robot_name_1 && robot_1_is_under_control) {
-			if (key_pressed.at(GLFW_KEY_G) && !key_was_pressed.at(GLFW_KEY_G)){
-				cout << "Key G is pressed - changing grasping status Robot 1" << endl;
-				gripper_1_is_open = !gripper_1_is_open;
-			} 
-		} 
-		if (robot_name == robot_name_2 && !robot_1_is_under_control) {
-			if (key_pressed.at(GLFW_KEY_G) && !key_was_pressed.at(GLFW_KEY_G)){
-				cout << "Key G is pressed - changing grasping status Robot 2" << endl;
-				gripper_2_is_open = !gripper_2_is_open;
-			}
+		if (robot_name == robot_name_1) {
+			if (key_pressed.at(GLFW_KEY_G)) {gripper_1_is_open=false;}
+			else {gripper_1_is_open=true;}
+		}
+
+		if (robot_name == robot_name_2) {
+			if (key_pressed.at(GLFW_KEY_G)) {gripper_2_is_open=false;}
+			else {gripper_2_is_open=true;}
 		}
 
 		// Switch between the two robots
@@ -495,12 +494,7 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		if (robot_name == robot_name_1) {
 
 			if (!robot_1_is_under_control) {
-				motion_force_task->setGoalPosition(
-						robot->positionInWorld(link_name)
-						);
-				motion_force_task->setGoalOrientation(
-					robot->rotationInWorld(link_name)
-					);
+				motion_force_task->reInitializeTask();
 			}
 			else {
 				// Grasping control
@@ -550,12 +544,7 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		} else if (robot_name == robot_name_2) {
 
 			if (robot_1_is_under_control) {
-				motion_force_task->setGoalPosition(
-						robot->positionInWorld(link_name)
-						);
-				motion_force_task->setGoalOrientation(
-					robot->rotationInWorld(link_name)
-					);
+				motion_force_task->reInitializeTask();
 			}
 			else {
 				
