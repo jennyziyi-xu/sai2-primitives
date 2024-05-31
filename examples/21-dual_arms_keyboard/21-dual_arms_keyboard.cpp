@@ -69,6 +69,8 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 VectorXd robot_control_torques = Eigen::VectorXd::Zero(9);
 VectorXd robot_control_torques_2 = Eigen::VectorXd::Zero(9);
 
+// Vector2d gripper_goal_open = Vector2d(0.02, -0.02);
+// Vector2d gripper_goal_open = Vector2d(0.05, -0.05);
 Vector2d gripper_goal_open = Vector2d(0.1, -0.1);
 
 
@@ -93,10 +95,8 @@ bool key_board_only = true;
 // bool key_board_only = false;
 
 // How to switch between the two robots
+// bool keep_pressing_B_to_switch = true;
 bool keep_pressing_B_to_switch = false;
-
-bool is_grasping = false;
-
 Vector6d UI_torques = Eigen::VectorXd::Zero(6);
 
 int main() {
@@ -524,6 +524,7 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 			}
 		}
 
+
 		// update task model
 		N_prec.setIdentity();
 		motion_force_task->updateTaskModel(N_prec);
@@ -580,8 +581,7 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 			{
 				lock_guard<mutex> lock(mtx);
 				robot_control_torques = robot_controller->computeControlTorques() + gripper_task->computeTorques();
-			} 
-
+			}
 			if (!gripper_1_is_open){
 				cout << "Gripper 1 is closed" << endl;
 				MatrixXd Jv = MatrixXd::Zero(3,dof);
