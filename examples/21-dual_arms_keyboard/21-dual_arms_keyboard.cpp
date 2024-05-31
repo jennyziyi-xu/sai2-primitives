@@ -70,7 +70,9 @@ VectorXd robot_control_torques = Eigen::VectorXd::Zero(9);
 VectorXd robot_control_torques_2 = Eigen::VectorXd::Zero(9);
 
 // Vector2d gripper_goal_open = Vector2d(0.02, -0.02);
-Vector2d gripper_goal_open = Vector2d(0.05, -0.05);
+// Vector2d gripper_goal_open = Vector2d(0.05, -0.05);
+Vector2d gripper_goal_open = Vector2d(0.1, -0.1);
+
 
 Vector2d gripper_goal_closed = Vector2d(0.0, 0.0);
 
@@ -119,7 +121,7 @@ int main() {
 	sim->setCoeffFrictionStatic(10.0);
 	sim->setCoeffFrictionDynamic(5.0);
 
-	sim->setCollisionRestitution(0.5);
+	sim->setCollisionRestitution(0.2);
 	// sim->setCollisionRestitution(0.0);
 
 
@@ -282,6 +284,11 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		compliant_frame
 	);
 
+
+	// auto motion_force_task = std::make_shared<Sai2Primitives::MotionForceTask>(robot, control_link, compliant_frame);
+	// motion_force_task->setPosControlGains(400, 40, 0);
+	// motion_force_task->setOriControlGains(400, 40, 0);
+
 	// create gripper task -- 2Dof Action
 	MatrixXd gripper_selection_matrix = MatrixXd::Zero(2, robot->dof());
 	gripper_selection_matrix(0, 7) = 1;
@@ -296,6 +303,21 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 	} else if (robot_name == robot_name_2) {
 		gripper_2_is_open = true;
 	}
+
+	// joint task
+
+	int dof = robot->dof();
+	MatrixXd N_prec = MatrixXd::Identity(dof, dof);
+
+	auto joint_task = std::make_shared<Sai2Primitives::JointTask>(robot);
+	joint_task->setGains(400, 40, 0);
+
+	VectorXd q_desired(robot->dof());
+	q_desired.head(7) << -30.0, -15.0, -15.0, -105.0, 0.0, 90.0, 45.0;
+	q_desired.head(7) *= M_PI / 180.0;
+	q_desired.tail(2) << 0.04, -0.04;
+	joint_task->setGoalPosition(q_desired);
+
 
 	motion_force_task->disableInternalOtg();
 	motion_force_task->enableVelocitySaturation(0.9, M_PI);
@@ -501,6 +523,14 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 				robot_1_is_under_control = !robot_1_is_under_control;
 			}
 		}
+
+
+		// update task model
+		N_prec.setIdentity();
+		motion_force_task->updateTaskModel(N_prec);
+		gripper_task->updateTaskModel(motion_force_task->getTaskAndPreviousNullspace());
+		joint_task->updateTaskModel(gripper_task->getTaskAndPreviousNullspace());
+
 
 		if (robot_name == robot_name_1) {
 

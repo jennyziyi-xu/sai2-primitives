@@ -103,7 +103,9 @@
 
 	<dynamic_object name="Box2">
 		<!-- <origin xyz="0.43 -0.27 0.27" rpy="0.0 0.0 0.0" /> -->
-		<origin xyz="0.53 -0.27 0.47" rpy="0.0 0.0 0.0" />
+		<!-- <origin xyz="0.53 -0.27 0.47" rpy="0.0 0.0 0.0" /> -->
+		<origin xyz="0.62 -0.27 0.47" rpy="0.0 0.0 0.0" />
+
 		<inertial>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<mass value="1" />
