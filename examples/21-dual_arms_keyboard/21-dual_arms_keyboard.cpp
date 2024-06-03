@@ -70,12 +70,18 @@ VectorXd robot_control_torques = Eigen::VectorXd::Zero(9);
 VectorXd robot_control_torques_2 = Eigen::VectorXd::Zero(9);
 
 // Vector2d gripper_goal_open = Vector2d(0.02, -0.02);
-Vector2d gripper_goal_open = Vector2d(0.05, -0.05);
+// Vector2d gripper_goal_open = Vector2d(0.05, -0.05);
+Vector2d gripper_goal_open = Vector2d(0.1, -0.1);
+
 
 Vector2d gripper_goal_closed = Vector2d(0.0, 0.0);
 
-double kp_gripper = 1e3;
-double kv_gripper = 1e2;
+
+double kp_gripper = 100.0;
+double kv_gripper = 20.0;
+
+// double kp_gripper = 1e3;
+// double kv_gripper = 1e2;
 
 // double kp_gripper = 5e3;
 // double kv_gripper = 1e2;
@@ -113,6 +119,11 @@ int main() {
 	sim->addSimulatedForceSensor(robot_name_2, link_name, Affine3d::Identity(),
 								55.0);
 	sim->setCoeffFrictionStatic(10.0);
+	sim->setCoeffFrictionDynamic(5.0);
+
+	sim->setCollisionRestitution(0.2);
+	// sim->setCollisionRestitution(0.0);
+
 
 	// load graphics scene
 	auto graphics = make_shared<Sai2Graphics::Sai2Graphics>(world_file);
@@ -264,12 +275,19 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		 << endl;
 
 	// create robot controller -- 6Dof Action
+	const Vector3d control_point = Vector3d(0, 0, 0.07);
 	Affine3d compliant_frame = Affine3d::Identity();
+	compliant_frame.translation() = control_point;
 	auto motion_force_task = make_shared<Sai2Primitives::MotionForceTask>(
 		robot, 
 		link_name, 
 		compliant_frame
 	);
+
+
+	// auto motion_force_task = std::make_shared<Sai2Primitives::MotionForceTask>(robot, control_link, compliant_frame);
+	// motion_force_task->setPosControlGains(400, 40, 0);
+	// motion_force_task->setOriControlGains(400, 40, 0);
 
 	// create gripper task -- 2Dof Action
 	MatrixXd gripper_selection_matrix = MatrixXd::Zero(2, robot->dof());
@@ -279,13 +297,27 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 	gripper_task->setDynamicDecouplingType(Sai2Primitives::DynamicDecouplingType::IMPEDANCE);
 	
 	gripper_task->setGains(kp_gripper, kv_gripper, 0);
-	gripper_task->disableInternalOtg();
 	gripper_task->setGoalPosition(gripper_goal_open);
 	if (robot_name == robot_name_1) {
 		gripper_1_is_open = true;
 	} else if (robot_name == robot_name_2) {
 		gripper_2_is_open = true;
 	}
+
+	// joint task
+
+	int dof = robot->dof();
+	MatrixXd N_prec = MatrixXd::Identity(dof, dof);
+
+	// auto joint_task = std::make_shared<Sai2Primitives::JointTask>(robot);
+	// joint_task->setGains(400, 40, 0);
+
+	// VectorXd q_desired(robot->dof());
+	// q_desired.head(7) << -30.0, -15.0, -15.0, -105.0, 0.0, 90.0, 45.0;
+	// q_desired.head(7) *= M_PI / 180.0;
+	// q_desired.tail(2) << 0.04, -0.04;
+	// joint_task->setGoalPosition(q_desired);
+
 
 	motion_force_task->disableInternalOtg();
 	motion_force_task->enableVelocitySaturation(0.9, M_PI);
@@ -389,33 +421,33 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		// Move in Z direction
 		if (key_pressed.at(GLFW_KEY_Q)) 
 		{
-			cout << "Key Q is pressed -- MOVING up (Z-positive direction)" << endl;
+			// cout << "Key Q is pressed -- MOVING up (Z-positive direction)" << endl;
 			delta_xyz = 0.01 * Vector3d::UnitZ();
 		} else if (key_pressed.at(GLFW_KEY_W))
 		{
-			cout << "Key W is pressed -- MOVING down (Z-negative direction)" << endl;
+			// cout << "Key W is pressed -- MOVING down (Z-negative direction)" << endl;
 			delta_xyz = -0.01 * Vector3d::UnitZ();
 		}
 
 		// Move in Y direction
 		if (key_pressed.at(GLFW_KEY_E)) 
 		{
-			cout << "Key E is pressed -- MOVING in Y-positive direction" << endl;
+			// cout << "Key E is pressed -- MOVING in Y-positive direction" << endl;
 			delta_xyz = 0.01 * Vector3d::UnitY();
 		} else if (key_pressed.at(GLFW_KEY_R))
 		{
-			cout << "Key R is pressed -- MOVING in Y-negative direction" << endl;
+			// cout << "Key R is pressed -- MOVING in Y-negative direction" << endl;
 			delta_xyz = -0.01 * Vector3d::UnitY();
 		}
 
 		// Move in Y direction
 		if (key_pressed.at(GLFW_KEY_X)) 
 		{
-			cout << "Key X is pressed -- MOVING in X-positive direction" << endl;
+			// cout << "Key X is pressed -- MOVING in X-positive direction" << endl;
 			delta_xyz = 0.01 * Vector3d::UnitX();
 		} else if (key_pressed.at(GLFW_KEY_C))
 		{
-			cout << "Key C is pressed -- MOVING in X-negative direction" << endl;
+			// cout << "Key C is pressed -- MOVING in X-negative direction" << endl;
 			delta_xyz = -0.01 * Vector3d::UnitX();
 		}
 
@@ -423,13 +455,13 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		// rotate about X-axis
 		if (key_pressed.at(GLFW_KEY_J)) 
 		{
-			cout << "Key J is pressed -- Rot CCW about X-axis " << endl;
+			// cout << "Key J is pressed -- Rot CCW about X-axis " << endl;
 			goal_orientation =
 				AngleAxisd( + M_PI / 3.0, Vector3d::UnitX()).toRotationMatrix() *
 				cur_orientation;
 		} else if (key_pressed.at(GLFW_KEY_L))
 		{
-			cout << "Key L is pressed -- Rot CW about X-axis " << endl;
+			// cout << "Key L is pressed -- Rot CW about X-axis " << endl;
 			goal_orientation =
 				AngleAxisd( - M_PI / 3.0, Vector3d::UnitX()).toRotationMatrix() *
 				cur_orientation;
@@ -438,13 +470,13 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		// rotate about Y-axis
 		if (key_pressed.at(GLFW_KEY_I)) 
 		{
-			cout << "Key I is pressed -- Rot CCW about Y-axis " << endl;
+			// cout << "Key I is pressed -- Rot CCW about Y-axis " << endl;
 			goal_orientation =
 				AngleAxisd( + M_PI / 3.0, Vector3d::UnitY()).toRotationMatrix() *
 				cur_orientation;
 		} else if (key_pressed.at(GLFW_KEY_K))
 		{
-			cout << "Key K is pressed -- Rot CW about Y-axis " << endl;
+			// cout << "Key K is pressed -- Rot CW about Y-axis " << endl;
 
 			goal_orientation =
 				AngleAxisd( - M_PI / 3.0, Vector3d::UnitY()).toRotationMatrix() *
@@ -454,13 +486,13 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		// rotate about Z-axis
 		if (key_pressed.at(GLFW_KEY_N)) 
 		{
-			cout << "Key N is pressed -- Rot CCW about Z-axis " << endl;
+			// cout << "Key N is pressed -- Rot CCW about Z-axis " << endl;
 			goal_orientation =
 				AngleAxisd( + M_PI / 3.0, Vector3d::UnitZ()).toRotationMatrix() *
 				cur_orientation;
 		} else if (key_pressed.at(GLFW_KEY_M))
 		{
-			cout << "Key M is pressed -- Rot CW about Z-axis " << endl;
+			// cout << "Key M is pressed -- Rot CW about Z-axis " << endl;
 
 			goal_orientation =
 				AngleAxisd( - M_PI / 3.0, Vector3d::UnitZ()).toRotationMatrix() *
@@ -492,7 +524,16 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 			}
 		}
 
-		if (robot_name == robot_name_1) {
+
+		// update task model
+		// N_prec.setIdentity();
+		// motion_force_task->updateTaskModel(N_prec);
+		// gripper_task->updateTaskModel(motion_force_task->getTaskAndPreviousNullspace());
+		// joint_task->updateTaskModel(gripper_task->getTaskAndPreviousNullspace());
+		// cout << robot_name << endl;
+
+
+		if (robot_name == robot_name_1 && robot_1_is_under_control) {
 
 			if (!robot_1_is_under_control) {
 				motion_force_task->reInitializeTask();
@@ -505,14 +546,14 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 				// 6Dof Control 
 				if (key_board_only) {
 					motion_force_task->setGoalPosition(
-						robot->positionInWorld(link_name) + delta_xyz
+						robot->positionInWorld(link_name, control_point) + delta_xyz
 						);
 					motion_force_task->setGoalOrientation(
 						goal_orientation
 						);
 				} else {
 					// compute haptic control
-					haptic_input.robot_position = robot->positionInWorld(link_name);
+					haptic_input.robot_position = robot->positionInWorld(link_name, control_point);
 					haptic_input.robot_orientation = robot->rotationInWorld(link_name);
 					haptic_input.robot_linear_velocity =
 						robot->linearVelocityInWorld(link_name);
@@ -534,6 +575,7 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 
 				redis_client.sendAllFromGroup();
 
+				// cout << "robot_control_torques=" << robot_control_torques << endl;
 			}
 			
 			// lockers
@@ -541,8 +583,17 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 				lock_guard<mutex> lock(mtx);
 				robot_control_torques = robot_controller->computeControlTorques() + gripper_task->computeTorques();
 			}
+			if (!gripper_1_is_open){
+				cout << "Gripper 1 is closed" << endl;
+				MatrixXd Jv = MatrixXd::Zero(3,dof);
+				Jv = robot->Jv(link_name, control_point);
+				Vector3d gravity = Vector3d(0, 0, -9.8);
+				float mass = 1;
+				Vector3d force = gravity * mass;
+				robot_control_torques = robot_control_torques - Jv.transpose() *force;
+			}
 
-		} else if (robot_name == robot_name_2) {
+		} else if (robot_name == robot_name_2 && !robot_1_is_under_control) {
 
 			if (robot_1_is_under_control) {
 				motion_force_task->reInitializeTask();
@@ -556,14 +607,14 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 				// 6Dof Control 
 				if (key_board_only) {
 					motion_force_task->setGoalPosition(
-						robot->positionInWorld(link_name) + delta_xyz
+						robot->positionInWorld(link_name, control_point) + delta_xyz
 						);
 					motion_force_task->setGoalOrientation(
 						goal_orientation
 						);
 				} else {
 					// compute haptic control
-					haptic_input.robot_position = robot->positionInWorld(link_name);
+					haptic_input.robot_position = robot->positionInWorld(link_name, control_point);
 					haptic_input.robot_orientation = robot->rotationInWorld(link_name);
 					haptic_input.robot_linear_velocity =
 						robot->linearVelocityInWorld(link_name);
@@ -585,12 +636,22 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 
 				redis_client.sendAllFromGroup();
 
+				// cout << "robot_control_torques_2=" << robot_control_torques_2 << endl;
 			}
 
 			// lockers
 			{
 				lock_guard<mutex> lock(mtx);
 				robot_control_torques_2 = robot_controller->computeControlTorques() + gripper_task->computeTorques();
+			}
+			if (!gripper_2_is_open){
+				cout << "Gripper 2 is closed" << endl;
+				MatrixXd Jv = MatrixXd::Zero(3,dof);
+				Jv = robot->Jv(link_name, control_point);
+				Vector3d gravity = Vector3d(0, 0, -9.8);
+				float mass = 1;
+				Vector3d force = gravity * mass;
+				robot_control_torques_2 = robot_control_torques_2 - Jv.transpose() *force;
 			}
 		}
 
