@@ -28,6 +28,8 @@ const string link_name = "link7";
 
 // mutex for control torques
 mutex mtx;
+// mutex for key press checks
+mutex key_mtx;
 
 // map of flags for key presses
 map<int, bool> key_pressed = {
@@ -119,7 +121,8 @@ int main() {
 	sim->addSimulatedForceSensor(robot_name_2, link_name, Affine3d::Identity(),
 								55.0);
 	sim->setCoeffFrictionStatic(10.0);
-	sim->setCoeffFrictionDynamic(5.0);
+	// sim->setCoeffFrictionDynamic(5.0);
+	sim->setCoeffFrictionDynamic(10.0);
 
 	sim->setCollisionRestitution(0.2);
 	// sim->setCollisionRestitution(0.0);
@@ -163,8 +166,11 @@ int main() {
 	while (graphics->isWindowOpen()) {
 		graphicsTimer.waitForNextLoop();
 
-		for (auto& key : key_pressed) {
-			key_pressed[key.first] = graphics->isKeyPressed(key.first);
+		{
+			lock_guard<mutex> lock(key_mtx);
+			for (auto& key : key_pressed) {
+				key_pressed[key.first] = graphics->isKeyPressed(key.first);
+			}
 		}
 
 		// if (key_pressed.at(GLFW_KEY_B)) {
@@ -394,14 +400,11 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		// read haptic device state from redis
 		redis_client.receiveAllFromGroup();
 
-		
-
 		// compute robot control
 		motion_force_task->updateSensedForceAndMoment(
 			sim->getSensedForce(robot_name, link_name),
 			sim->getSensedMoment(robot_name, link_name));
 		
-
 		// state machine for button presses
 		if (haptic_controller->getHapticControlType() ==
 				Sai2Primitives::HapticControlType::HOMING &&
@@ -418,34 +421,62 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		Matrix3d cur_orientation = robot->rotationInWorld(link_name);
 		Matrix3d goal_orientation = cur_orientation;
 
+		// local boolean to store key press status 
+		bool key_Q_pressed, key_W_pressed, key_E_pressed, key_R_pressed;
+		bool key_X_pressed, key_C_pressed, key_J_pressed, key_L_pressed;
+		bool key_I_pressed, key_K_pressed, key_N_pressed, key_M_pressed;
+		bool key_G_pressed, key_B_pressed, key_B_was_pressed;
+
+		// Mutex block to safely read the key states
+		{
+			lock_guard<mutex> lock(key_mtx);
+			key_Q_pressed = key_pressed.at(GLFW_KEY_Q);
+			key_W_pressed = key_pressed.at(GLFW_KEY_W);
+			key_E_pressed = key_pressed.at(GLFW_KEY_E);
+			key_R_pressed = key_pressed.at(GLFW_KEY_R);
+			key_X_pressed = key_pressed.at(GLFW_KEY_X);
+			key_C_pressed = key_pressed.at(GLFW_KEY_C);
+			key_J_pressed = key_pressed.at(GLFW_KEY_J);
+			key_L_pressed = key_pressed.at(GLFW_KEY_L);
+			key_I_pressed = key_pressed.at(GLFW_KEY_I);
+			key_K_pressed = key_pressed.at(GLFW_KEY_K);
+			key_N_pressed = key_pressed.at(GLFW_KEY_N);
+			key_M_pressed = key_pressed.at(GLFW_KEY_M);
+
+			key_G_pressed = key_pressed.at(GLFW_KEY_G);
+			key_B_pressed = key_pressed.at(GLFW_KEY_B);
+			key_B_was_pressed = key_was_pressed.at(GLFW_KEY_B);
+		}
+
+
 		// Move in Z direction
-		if (key_pressed.at(GLFW_KEY_Q)) 
+		if (key_Q_pressed) 
 		{
 			// cout << "Key Q is pressed -- MOVING up (Z-positive direction)" << endl;
 			delta_xyz = 0.01 * Vector3d::UnitZ();
-		} else if (key_pressed.at(GLFW_KEY_W))
+		} else if (key_W_pressed)
 		{
 			// cout << "Key W is pressed -- MOVING down (Z-negative direction)" << endl;
 			delta_xyz = -0.01 * Vector3d::UnitZ();
 		}
 
 		// Move in Y direction
-		if (key_pressed.at(GLFW_KEY_E)) 
+		if (key_E_pressed)
 		{
 			// cout << "Key E is pressed -- MOVING in Y-positive direction" << endl;
 			delta_xyz = 0.01 * Vector3d::UnitY();
-		} else if (key_pressed.at(GLFW_KEY_R))
+		} else if (key_R_pressed)
 		{
 			// cout << "Key R is pressed -- MOVING in Y-negative direction" << endl;
 			delta_xyz = -0.01 * Vector3d::UnitY();
 		}
 
 		// Move in Y direction
-		if (key_pressed.at(GLFW_KEY_X)) 
+		if (key_X_pressed) 
 		{
 			// cout << "Key X is pressed -- MOVING in X-positive direction" << endl;
 			delta_xyz = 0.01 * Vector3d::UnitX();
-		} else if (key_pressed.at(GLFW_KEY_C))
+		} else if (key_C_pressed)
 		{
 			// cout << "Key C is pressed -- MOVING in X-negative direction" << endl;
 			delta_xyz = -0.01 * Vector3d::UnitX();
@@ -453,28 +484,28 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 
 
 		// rotate about X-axis
-		if (key_pressed.at(GLFW_KEY_J)) 
+		if (key_J_pressed) 
 		{
 			// cout << "Key J is pressed -- Rot CCW about X-axis " << endl;
 			goal_orientation =
-				AngleAxisd( + M_PI / 3.0, Vector3d::UnitX()).toRotationMatrix() *
+				AngleAxisd( + M_PI / 6.0, Vector3d::UnitX()).toRotationMatrix() *
 				cur_orientation;
-		} else if (key_pressed.at(GLFW_KEY_L))
+		} else if (key_L_pressed)
 		{
 			// cout << "Key L is pressed -- Rot CW about X-axis " << endl;
 			goal_orientation =
-				AngleAxisd( - M_PI / 3.0, Vector3d::UnitX()).toRotationMatrix() *
+				AngleAxisd( - M_PI / 6.0, Vector3d::UnitX()).toRotationMatrix() *
 				cur_orientation;
 		}
 
 		// rotate about Y-axis
-		if (key_pressed.at(GLFW_KEY_I)) 
+		if (key_I_pressed) 
 		{
 			// cout << "Key I is pressed -- Rot CCW about Y-axis " << endl;
 			goal_orientation =
 				AngleAxisd( + M_PI / 3.0, Vector3d::UnitY()).toRotationMatrix() *
 				cur_orientation;
-		} else if (key_pressed.at(GLFW_KEY_K))
+		} else if (key_K_pressed)
 		{
 			// cout << "Key K is pressed -- Rot CW about Y-axis " << endl;
 
@@ -484,13 +515,13 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		}
 
 		// rotate about Z-axis
-		if (key_pressed.at(GLFW_KEY_N)) 
+		if (key_N_pressed) 
 		{
 			// cout << "Key N is pressed -- Rot CCW about Z-axis " << endl;
 			goal_orientation =
 				AngleAxisd( + M_PI / 3.0, Vector3d::UnitZ()).toRotationMatrix() *
 				cur_orientation;
-		} else if (key_pressed.at(GLFW_KEY_M))
+		} else if (key_M_pressed)
 		{
 			// cout << "Key M is pressed -- Rot CW about Z-axis " << endl;
 
@@ -501,24 +532,24 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 
 		// Change grasping status
 		if (robot_name == robot_name_1) {
-			if (key_pressed.at(GLFW_KEY_G)) {gripper_1_is_open=false;}
+			if (key_G_pressed) {gripper_1_is_open=false;}
 			else {gripper_1_is_open=true;}
 		}
 
 		if (robot_name == robot_name_2) {
-			if (key_pressed.at(GLFW_KEY_G)) {gripper_2_is_open=false;}
+			if (key_G_pressed) {gripper_2_is_open=false;}
 			else {gripper_2_is_open=true;}
 		}
 
 		// Switch between the two robots
 		if (robot_name == robot_name_1 && robot_1_is_under_control) {
-			if (key_pressed.at(GLFW_KEY_B) && !key_was_pressed.at(GLFW_KEY_B)){
+			if (key_B_pressed && !key_B_was_pressed){
 				cout << "Key B is pressed - switching Robot " << endl;
 				robot_1_is_under_control = !robot_1_is_under_control;
 			} 
 		} 
 		if (robot_name == robot_name_2 && !robot_1_is_under_control) {
-			if (key_pressed.at(GLFW_KEY_B) && !key_was_pressed.at(GLFW_KEY_B)){
+			if (key_B_pressed && !key_B_was_pressed){
 				cout << "Key B is pressed - changing Robot" << endl;
 				robot_1_is_under_control = !robot_1_is_under_control;
 			}
@@ -584,7 +615,7 @@ if (robot_name == robot_name_1 && robot_1_is_under_control) {
 				robot_control_torques = robot_controller->computeControlTorques() + gripper_task->computeTorques();
 			}
 			if (!gripper_1_is_open){
-				cout << "Gripper 1 is closed" << endl;
+				// cout << "Gripper 1 is closed" << endl;
 				MatrixXd Jv = MatrixXd::Zero(3,dof);
 				Jv = robot->Jv(link_name, control_point);
 				Vector3d gravity = Vector3d(0, 0, -9.8);
@@ -645,7 +676,7 @@ if (robot_name == robot_name_1 && robot_1_is_under_control) {
 				robot_control_torques_2 = robot_controller->computeControlTorques() + gripper_task->computeTorques();
 			}
 			if (!gripper_2_is_open){
-				cout << "Gripper 2 is closed" << endl;
+				// cout << "Gripper 2 is closed" << endl;
 				MatrixXd Jv = MatrixXd::Zero(3,dof);
 				Jv = robot->Jv(link_name, control_point);
 				Vector3d gravity = Vector3d(0, 0, -9.8);
@@ -676,7 +707,11 @@ if (robot_name == robot_name_1 && robot_1_is_under_control) {
 		} 
 
 		haptic_button_was_pressed = haptic_button_is_pressed;
-		key_was_pressed = key_pressed;
+
+		{
+			lock_guard<mutex> lock(key_mtx);
+			key_was_pressed = key_pressed;
+		}
 	}
 
 	redis_client.setEigen(createRedisKey(COMMANDED_FORCE_KEY_SUFFIX, 0),
