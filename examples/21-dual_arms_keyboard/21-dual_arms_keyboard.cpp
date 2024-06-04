@@ -524,16 +524,16 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 			}
 		}
 
+		
+//    update task model
+// 		N_prec.setIdentity();
+// 		motion_force_task->updateTaskModel(N_prec);
+// 		gripper_task->updateTaskModel(motion_force_task->getTaskAndPreviousNullspace());
+// 		joint_task->updateTaskModel(gripper_task->getTaskAndPreviousNullspace());
 
-		// update task model
-		// N_prec.setIdentity();
-		// motion_force_task->updateTaskModel(N_prec);
-		// gripper_task->updateTaskModel(motion_force_task->getTaskAndPreviousNullspace());
-		// joint_task->updateTaskModel(gripper_task->getTaskAndPreviousNullspace());
-		// cout << robot_name << endl;
 
-
-		if (robot_name == robot_name_1 && robot_1_is_under_control) {
+// 		if (robot_name == robot_name_1) {
+if (robot_name == robot_name_1 && robot_1_is_under_control) {
 
 			if (!robot_1_is_under_control) {
 				motion_force_task->reInitializeTask();
