@@ -274,7 +274,7 @@
       <origin xyz="0 0 0.1654" rpy="0 0 -0.78539816339"/>
       <axis xyz="0 1 0"/>
       <calibration falling="0.04" />
-      <limit effort="20" lower="0.0" upper="0.04" velocity="0.2"/>
+      <limit effort="20" lower="0.0" upper="0.06" velocity="0.2"/>
     </joint>
     <joint name="finger_joint2" type="prismatic">
       <parent link="link7"/>
@@ -282,6 +282,6 @@
       <origin xyz="0 0 0.1654" rpy="0 0 -0.78539816339"/>
       <axis xyz="0 1 0"/>
       <calibration falling="-0.04" />
-      <limit effort="20" lower="-0.04" upper="0" velocity="0.2"/>
+      <limit effort="20" lower="-0.06" upper="0" velocity="0.2"/>
     </joint>
 </robot>
