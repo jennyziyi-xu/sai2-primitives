@@ -562,15 +562,14 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		// additional torques for object holding
 		gripper_hold_obj = false;
 		obj_projected_torques.setZero();
-		if (robot->q()(7) > 0.03) {
-
-			// Jv = robot->Jv(link_name, control_point);
+		if (robot->q()(7) > 0.015) {
+			Jv = robot->Jv(link_name, control_point);
 			
-			Eigen::Affine3d obj_pose_in_world = sim->getObjectPose("Box2");
-			Eigen::Affine3d obj_pose_in_robot_base = T_robot_world * obj_pose_in_world;
-			Eigen::Affine3d T_link_base = robot->transform(link_name).inverse();
-			Vector3d obj_pos_in_link = T_link_base * obj_pose_in_robot_base.translation();
-			Jv = robot->Jv(link_name, obj_pos_in_link);
+			// Eigen::Affine3d obj_pose_in_world = sim->getObjectPose("Box2");
+			// Eigen::Affine3d obj_pose_in_robot_base = T_robot_world * obj_pose_in_world;
+			// Eigen::Affine3d T_link_base = robot->transform(link_name).inverse();
+			// Vector3d obj_pos_in_link = T_link_base * obj_pose_in_robot_base.translation();
+			// Jv = robot->Jv(link_name, obj_pos_in_link);
 
 			if ( (robot_name == robot_name_1) && (!gripper_1_is_open) ) {
 				gripper_hold_obj = true;
@@ -584,7 +583,16 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 			}
 		}
 
+
 		if (!gripper_hold_obj) {obj_projected_torques.setZero();}
+
+		if (robot_name == robot_name_1) {
+
+			cout << "robot->q()(7) " << robot->q()(7) << " gripper_hold_obj " << gripper_hold_obj << " obj_projected_torques: " << obj_projected_torques << endl;
+
+		}
+
+
 
 		// Communicate with the simulation thread
 		redis_client.sendAllFromGroup();
