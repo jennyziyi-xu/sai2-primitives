@@ -226,7 +226,7 @@
 	
 
 	<dynamic_object name="box_of_almond_milk">
-		<origin xyz="0.5 0.1 0.28" rpy="0 0 0" />
+		<origin xyz="0.6 0.1 0.28" rpy="0 0 0" />
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<geometry>
@@ -247,7 +247,7 @@
 	</dynamic_object>
 
 	<dynamic_object name="box_of_coffee">
-		<origin xyz="0.6 -0.2 0.28" rpy="0 0 0" />
+		<origin xyz="0.7 -0.2 0.28" rpy="0 0 0" />
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<geometry>
@@ -266,6 +266,40 @@
 			<inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0" />
 		</inertial>
 	</dynamic_object>
+
+	<dynamic_object name="carton_of_orange_juice">
+		<origin xyz="0.5 -0.1 0.26" rpy="0 0 0" />
+		<visual>
+			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+			<geometry>
+				<mesh filename="${EXAMPLE_21_FOLDER}/carton_of_orange_juice/shape/visual/carton_of_orange_juice-brryuo-base_link.obj" scale="0.7 0.7 1.2" />
+			</geometry>
+		</visual>
+		<collision>
+			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+			<geometry>
+				<box size="0.07 0.08 0.23"/>
+			</geometry>
+		</collision>
+		<inertial>
+			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+			<mass value="1" />
+			<inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0" />
+		</inertial>
+	</dynamic_object>
+
+	<!-- <static_object name="Box1">
+		<origin xyz="0.5 -0.1 0.24" rpy="0 0 0" />
+		<visual>
+			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+			<geometry>
+				<box size="0.07 0.08 0.23" />
+			</geometry>
+			<material name="material_blue">
+				<color rgba="0.20 0.47 1.00 1.0" />
+			</material>
+		</visual>
+	</static_object> -->
 
 
 	<static_object name='asparagus'>
@@ -316,70 +350,6 @@
 	</static_object> -->
 
 
-
-
-	<!-- <static_object name="agveuv">
-		<origin xyz="0.5 0.27 0.1" rpy="0.0 0.0 0.0" />
-		<visual>
-			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
-			<geometry>
-				<mesh filename="${EXAMPLE_21_FOLDER}/apple/shape/visual/apple-agveuv-base_link.obj" scale="0.8 0.8 0.8" />
-			</geometry>
-		</visual>
-	</static_object> -->
-
-	<!-- <dynamic_object name="Box1">
-
-		<origin xyz="1.0 0.27 0.27" rpy="0.0 0.0 0.0" />
-
-		<inertial>
-			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
-			<mass value="1" />
-			<inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0" />
-		</inertial>
-		<collision>
-			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
-			<geometry>
-				<box size="0.1 0.05 0.17" />
-			</geometry>
-		</collision>
-		<visual>
-			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
-			<geometry>
-				<box size="0.1 0.05 0.17" />
-			</geometry>
-			<material name="material_green">
-				<color rgba="0.1 0.6 0.1 1.0" />
-			</material>
-		</visual>
-	</dynamic_object> -->
-
-
-
-	<!-- <dynamic_object name="Box2">
-		<origin xyz="0.62 -0.27 0.47" rpy="0.0 0.0 0.0" />
-
-		<inertial>
-			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
-			<mass value="1" />
-			<inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0" />
-		</inertial>
-		<collision>
-			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
-			<geometry>
-				<box size="0.1 0.02 0.23" />
-			</geometry>
-		</collision>
-		<visual>
-			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
-			<geometry>
-				<box size="0.1 0.02 0.23" />
-			</geometry>
-			<material name="material_green">
-				<color rgba="0.1 0.6 0.1 1.0" />
-			</material>
-		</visual>
-	</dynamic_object> -->
 	
 
 	<light name="light1" type="directional">
