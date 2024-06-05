@@ -95,26 +95,26 @@
 			</geometry>
 		</visual>
 		<collision>
-			<origin xyz="0.0 0.12 0.0" rpy="0 0 0" />
+			<origin xyz="0.0 0.13 0.0" rpy="0 0 0" />
 			<geometry>
-				<box size="0.2 0.03 0.1" />
+				<box size="0.2 0.01 0.1" />
 			</geometry>
 		</collision>
 	</static_object>
 
 
-	<static_object name="Box">
+	<!-- <static_object name="Box_wall_baguette">
 		<origin xyz="0.5 -0.7 0.165" rpy="0.0 0.0 0.0" />
 		<visual>
-			<origin xyz="0.0 0.12 0" rpy="0 0 0" />
+			<origin xyz="0.0 0.13 0" rpy="0 0 0" />
 			<geometry>
-				<box size="0.2 0.03 0.1" />
+				<box size="0.2 0.01 0.1" />
 			</geometry>
 			<material name="material_blue">
 				<color rgba="0.20 0.47 1.00 1.0" />
 			</material>
 		</visual>
-	</static_object>
+	</static_object> -->
 
 
 	<dynamic_object name="box_of_almond_milk">
@@ -171,18 +171,19 @@
 
 	</static_object>
 
+
 	<dynamic_object name='baguette'>
-		<origin xyz="0.5 -0.65 0.22" rpy="0.3 0 0" />
+		<origin xyz="0.5 -0.6 0.24" rpy="0.7 0 0" />
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<geometry>
-				<mesh filename="${EXAMPLE_21_FOLDER}/baguette/shape/visual/baguette-xydhpd-base_link.obj" scale="1.0 2.0 2.0" />
+				<mesh filename="${EXAMPLE_21_FOLDER}/baguette/shape/visual/baguette-xydhpd-base_link.obj" scale="1.0 3.0 3.0" />
 			</geometry>
 		</visual>
 		<collision>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0.2" />
 			<geometry>
-				<box size="0.05 0.17 0.04"/>
+				<box size="0.04 0.23 0.05"/>
 			</geometry>
 		</collision>
 		<inertial>
@@ -192,13 +193,13 @@
 		</inertial>
 	</dynamic_object>
 
-<!-- 
-	<static_object name="Box">
-		<origin xyz="0.5 -0.6 0.2" rpy="0.0 0.0 0.2" />
+
+	<!-- <static_object name="Box1">
+		<origin xyz="0.5 -0.6 0.22" rpy="0.7 0.0 0.2" />
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<geometry>
-				<box size="0.05 0.17 0.04" />
+				<box size="0.04 0.23 0.05" />
 			</geometry>
 			<material name="material_blue">
 				<color rgba="0.20 0.47 1.00 1.0" />
