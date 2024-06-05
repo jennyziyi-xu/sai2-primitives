@@ -116,9 +116,9 @@ int main() {
 								 55.0);
 	sim->addSimulatedForceSensor(robot_name_2, link_name, Affine3d::Identity(),
 								55.0);
-	sim->setCoeffFrictionStatic(10.0);
+	sim->setCoeffFrictionStatic(1.0);
 	// sim->setCoeffFrictionDynamic(5.0);
-	sim->setCoeffFrictionDynamic(10.0);
+	sim->setCoeffFrictionDynamic(1.0);
 
 	sim->setCollisionRestitution(0.2);
 	// sim->setCollisionRestitution(0.0);
@@ -245,25 +245,25 @@ int main() {
 				delta_rot_1 = local_delta_rot;
 
 				// // Update grasping status
-				// if (key_G_pressed && !key_G_was_pressed) {
-				// 	cout << "Key G is pressed - changing grasping status for Robot 1" << endl;
-				// 	gripper_1_is_open = !gripper_1_is_open;
-				// }
+				if (key_G_pressed && !key_G_was_pressed) {
+					cout << "Key G is pressed - changing grasping status for Robot 1" << endl;
+					gripper_1_is_open = !gripper_1_is_open;
+				}
 
-				if (key_G_pressed) {gripper_1_is_open=false;}
-				else {gripper_1_is_open=true;}
+				// if (key_G_pressed) {gripper_1_is_open=false;}
+				// else {gripper_1_is_open=true;}
 			} else {
 				// assign local_delta_xyz and local_delta_rot to delta_xyz_2 and delta_rot_2
 				delta_xyz_2 = local_delta_xyz;
 				delta_rot_2 = local_delta_rot;
 
 				// Update grasping status
-				// if (key_G_pressed && !key_G_was_pressed) {
-				// 	cout << "Key G is pressed - changing grasping status for Robot 2" << endl;
-				// 	gripper_2_is_open = !gripper_2_is_open;
-				// }
-				if (key_G_pressed) {gripper_2_is_open=false;}
-				else {gripper_2_is_open=true;}
+				if (key_G_pressed && !key_G_was_pressed) {
+					cout << "Key G is pressed - changing grasping status for Robot 2" << endl;
+					gripper_2_is_open = !gripper_2_is_open;
+				}
+				// if (key_G_pressed) {gripper_2_is_open=false;}
+				// else {gripper_2_is_open=true;}
 			}
 		}
 
@@ -563,13 +563,13 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		gripper_hold_obj = false;
 		obj_projected_torques.setZero();
 		if (robot->q()(7) > 0.015) {
-			Jv = robot->Jv(link_name, control_point);
+			// Jv = robot->Jv(link_name, control_point);
 			
-			// Eigen::Affine3d obj_pose_in_world = sim->getObjectPose("Box2");
-			// Eigen::Affine3d obj_pose_in_robot_base = T_robot_world * obj_pose_in_world;
-			// Eigen::Affine3d T_link_base = robot->transform(link_name).inverse();
-			// Vector3d obj_pos_in_link = T_link_base * obj_pose_in_robot_base.translation();
-			// Jv = robot->Jv(link_name, obj_pos_in_link);
+			Eigen::Affine3d obj_pose_in_world = sim->getObjectPose("Box2");
+			Eigen::Affine3d obj_pose_in_robot_base = T_robot_world * obj_pose_in_world;
+			Eigen::Affine3d T_link_base = robot->transform(link_name).inverse();
+			Vector3d obj_pos_in_link = T_link_base * obj_pose_in_robot_base.translation();
+			Jv = robot->Jv(link_name, obj_pos_in_link);
 
 			if ( (robot_name == robot_name_1) && (!gripper_1_is_open) ) {
 				gripper_hold_obj = true;
@@ -588,7 +588,7 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 
 		if (robot_name == robot_name_1) {
 
-			cout << "robot->q()(7) " << robot->q()(7) << " gripper_hold_obj " << gripper_hold_obj << " obj_projected_torques: " << obj_projected_torques << endl;
+			// cout << "robot->q()(7) " << robot->q()(7) << " gripper_hold_obj " << gripper_hold_obj << " obj_projected_torques: " << obj_projected_torques << endl;
 
 		}
 
