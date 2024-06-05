@@ -10,6 +10,7 @@
         "unordered_map": "cpp",
         "vector": "cpp",
         "regex": "cpp",
-        "complex": "cpp"
+        "complex": "cpp",
+        "iostream": "cpp"
     }
 }
