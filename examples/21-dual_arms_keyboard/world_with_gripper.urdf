@@ -75,17 +75,6 @@
 
 	</static_object>
 
-	<static_object name="bucket-right">
-		<origin xyz="0.5 0.7 0.18" rpy="0 0 0" />
-
-		<visual>
-			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
-			<geometry>
-				<mesh filename="${EXAMPLE_21_FOLDER}/bucket/shape/visual/bucket-lsmlzi-base_link.obj" scale="1.3 1.3 0.5" />
-			</geometry>
-		</visual>
-	</static_object>
-
 	<static_object name="bucket-left">
 		<origin xyz="0.5 -0.73 0.165" rpy="0 0 0" />
 		<visual>
@@ -101,17 +90,33 @@
 			<geometry>
 				<box size="0.26 0.06 0.1" />
 			</geometry>
-			<!-- The left side wall  -->
+		</collision>
+	</static_object>
+
+
+	<static_object name="bucket_left_left_wall">
+		<origin xyz="0.5 -0.73 0.165" rpy="0 0 0" />
+		<collision>
 			<origin xyz="0.0 -0.18 0.0" rpy="0 0 0" />  
 			<geometry>
-				<box size="0.26 0.08 0.1" />
+				<box size="0.26 0.08 0.1"/>
 			</geometry>
-			<!-- The back side wall  -->
+		</collision>
+	</static_object>
+
+	<static_object name="bucket_left_back_wall">
+		<origin xyz="0.5 -0.73 0.165" rpy="0 0 0" />
+		<collision>
 			<origin xyz="-0.16 0 0" rpy="0 0 0" />  
 			<geometry>
 				<box size="0.06 0.28 0.1"/>
 			</geometry>
-			<!-- The front side wall  -->
+		</collision>
+	</static_object>
+
+	<static_object name="bucket_left_front_wall">
+		<origin xyz="0.5 -0.73 0.165" rpy="0 0 0" />
+		<collision>
 			<origin xyz="0.16 0 0" rpy="0 0 0" />  
 			<geometry>
 				<box size="0.06 0.28 0.1"/>
@@ -119,10 +124,61 @@
 		</collision>
 	</static_object>
 
-	<!-- right side wall -->
-	<!-- <static_object name="Box_wall_right">
-		<origin xyz="0.5 -0.73 0.165" rpy="0.0 0.0 0.0" />
+
+	<static_object name="bucket-right">
+		<origin xyz="0.5 0.6 0.165" rpy="0 0 0" />
+
 		<visual>
+			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+			<geometry>
+				<mesh filename="${EXAMPLE_21_FOLDER}/bucket/shape/visual/bucket-lsmlzi-base_link.obj" scale="1.6 1.6 0.5" />
+			</geometry>
+		</visual>
+
+		<collision>
+			<!-- The right side wall  -->
+			<origin xyz="0.0 0.18 0.0" rpy="0 0 0" />  
+			<geometry>
+				<box size="0.26 0.06 0.1" />
+			</geometry>
+		</collision>
+	</static_object>
+
+	<static_object name="bucket_right_left_wall">
+		<origin xyz="0.5 0.6 0.18" rpy="0 0 0" />
+		<collision>
+			<origin xyz="0.0 -0.18 0.0" rpy="0 0 0" />  
+			<geometry>
+				<box size="0.26 0.08 0.1"/>
+			</geometry>
+		</collision>
+	</static_object>
+
+	<static_object name="bucket_right_back_wall">
+		<origin xyz="0.5 0.6 0.18" rpy="0 0 0" />
+		<collision>
+			<origin xyz="-0.16 0 0" rpy="0 0 0" />  
+			<geometry>
+				<box size="0.06 0.28 0.1"/>
+			</geometry>
+		</collision>
+	</static_object>
+
+	<static_object name="bucket_right_front_wall">
+		<origin xyz="0.5 0.6 0.18" rpy="0 0 0" />
+		<collision>
+			<origin xyz="0.16 0 0" rpy="0 0 0" />  
+			<geometry>
+				<box size="0.06 0.28 0.1"/>
+			</geometry>
+		</collision>
+	</static_object>
+
+	
+	<!-- <static_object name="Box_wall_right">
+		<origin xyz="0.5 0.7 0.18" rpy="0.0 0.0 0.0" />
+		<visual>
+			right side wall
 			<origin xyz="0.0 0.18 0" rpy="0 0 0" />
 			<geometry>
 				<box size="0.26 0.06 0.1" />
@@ -130,13 +186,11 @@
 			<material name="material_blue">
 				<color rgba="0.20 0.47 1.00 1.0" />
 			</material>
-		</visual>
-	</static_object> -->
 
-	<!-- left side wall -->
-	<!-- <static_object name="Box_wall_left">
-		<origin xyz="0.5 -0.73 0.165" rpy="0.0 0.0 0.0" />
+		</visual>
+
 		<visual>
+			 left side wall
 			<origin xyz="0.0 -0.18 0" rpy="0 0 0" />
 			<geometry>
 				<box size="0.26 0.08 0.1" />
@@ -145,12 +199,9 @@
 				<color rgba="0.20 0.47 1.00 1.0" />
 			</material>
 		</visual>
-	</static_object> -->
 
-	<!-- front wall -->
-	<!-- <static_object name="Box_wall_front">
-		<origin xyz="0.5 -0.73 0.165" rpy="0.0 0.0 0.0" />
 		<visual>
+			front wall
 			<origin xyz="0.16 0 0" rpy="0 0 0" />
 			<geometry>
 				<box size="0.06 0.28 0.1" />
@@ -159,12 +210,9 @@
 				<color rgba="0.20 0.47 1.00 1.0" />
 			</material>
 		</visual>
-	</static_object> -->
 
-	<!-- Back wall -->
-	<!-- <static_object name="Box_wall_back">
-		<origin xyz="0.5 -0.73 0.165" rpy="0.0 0.0 0.0" />
 		<visual>
+			Back wall
 			<origin xyz="-0.16 0 0" rpy="0 0 0" />
 			<geometry>
 				<box size="0.06 0.28 0.1" />
@@ -175,6 +223,7 @@
 		</visual>
 	</static_object> -->
 
+	
 
 	<dynamic_object name="box_of_almond_milk">
 		<origin xyz="0.5 0.1 0.28" rpy="0 0 0" />
