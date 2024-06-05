@@ -79,12 +79,11 @@ Vector2d gripper_goal_open = Vector2d(0.1, -0.1);
 Vector2d gripper_goal_closed = Vector2d(0.0, 0.0);
 
 
-double kp_gripper = 100.0;
+double kp_gripper = 1000.0;
 double kv_gripper = 20.0;
 
 // double kp_gripper = 1e3;
 // double kv_gripper = 1e2;
-
 // double kp_gripper = 5e3;
 // double kv_gripper = 1e2;
 
@@ -281,7 +280,7 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		 << endl;
 
 	// create robot controller -- 6Dof Action
-	const Vector3d control_point = Vector3d(0, 0, 0.07);
+	const Vector3d control_point = Vector3d(0, 0, 0.27);
 	Affine3d compliant_frame = Affine3d::Identity();
 	compliant_frame.translation() = control_point;
 	auto motion_force_task = make_shared<Sai2Primitives::MotionForceTask>(
@@ -292,8 +291,8 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 
 
 	// auto motion_force_task = std::make_shared<Sai2Primitives::MotionForceTask>(robot, control_link, compliant_frame);
-	// motion_force_task->setPosControlGains(400, 40, 0);
-	// motion_force_task->setOriControlGains(400, 40, 0);
+	motion_force_task->setPosControlGains(400, 40, 0);
+	motion_force_task->setOriControlGains(400, 40, 0);
 
 	// create gripper task -- 2Dof Action
 	MatrixXd gripper_selection_matrix = MatrixXd::Zero(2, robot->dof());
@@ -385,6 +384,10 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 
 	// create a timer
 	Sai2Common::LoopTimer controlTimer(1000.0, 1e6);
+
+	// computing transformations
+	const Affine3d T_world_robot = sim->getRobotBaseTransform(robot_name);
+	const Affine3d T_robot_world = T_world_robot.inverse();
 
 	while (fSimulationRunning) {
 		// wait for next scheduled loop
@@ -488,13 +491,13 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		{
 			// cout << "Key J is pressed -- Rot CCW about X-axis " << endl;
 			goal_orientation =
-				AngleAxisd( + M_PI / 6.0, Vector3d::UnitX()).toRotationMatrix() *
+				AngleAxisd( + M_PI / 36.0, Vector3d::UnitX()).toRotationMatrix() *
 				cur_orientation;
 		} else if (key_L_pressed)
 		{
 			// cout << "Key L is pressed -- Rot CW about X-axis " << endl;
 			goal_orientation =
-				AngleAxisd( - M_PI / 6.0, Vector3d::UnitX()).toRotationMatrix() *
+				AngleAxisd( - M_PI / 36.0, Vector3d::UnitX()).toRotationMatrix() *
 				cur_orientation;
 		}
 
@@ -564,7 +567,7 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 
 
 // 		if (robot_name == robot_name_1) {
-if (robot_name == robot_name_1 && robot_1_is_under_control) {
+		if (robot_name == robot_name_1 && robot_1_is_under_control) {
 
 			if (!robot_1_is_under_control) {
 				motion_force_task->reInitializeTask();
@@ -617,11 +620,19 @@ if (robot_name == robot_name_1 && robot_1_is_under_control) {
 			if (!gripper_1_is_open){
 				// cout << "Gripper 1 is closed" << endl;
 				MatrixXd Jv = MatrixXd::Zero(3,dof);
-				Jv = robot->Jv(link_name, control_point);
+				// Jv = robot->Jv(link_name, control_point);
+				Eigen::Affine3d obj_pose_in_world = sim->getObjectPose("Box2");
+				Eigen::Affine3d obj_pose_in_robot_base = T_robot_world * obj_pose_in_world;
+
+				Eigen::Affine3d T_link_base = robot->transform(link_name).inverse();
+				Vector3d obj_pos_in_link = T_link_base * obj_pose_in_robot_base.translation();
+
+				Jv = robot->Jv(link_name, obj_pos_in_link);
+
 				Vector3d gravity = Vector3d(0, 0, -9.8);
 				float mass = 1;
 				Vector3d force = gravity * mass;
-				robot_control_torques = robot_control_torques - Jv.transpose() *force;
+				robot_control_torques = robot_control_torques - Jv.transpose() * force;
 			}
 
 		} else if (robot_name == robot_name_2 && !robot_1_is_under_control) {
