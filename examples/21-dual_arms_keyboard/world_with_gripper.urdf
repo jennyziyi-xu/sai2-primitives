@@ -25,7 +25,7 @@
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<geometry>
-				<box size="3.0 3.0 0.1" />
+				<box size="1.0 3.0 0.06" />
 			</geometry>
 			<material name="material_gray">
 				<color rgba="0.5 0.3 0.3 1.0" />
@@ -33,8 +33,8 @@
 		</visual>
 	</static_object>
 
-	<dynamic_object name="agveuv">
-		<origin xyz="0.5 0.27 0.1" rpy="0.0 0.0 0.0" />
+	<dynamic_object name="apple">
+		<origin xyz="0.5 0.27 0.2" rpy="0.0 0.0 0.0" />
 
 		<inertial>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
@@ -55,6 +55,26 @@
 			</geometry>
 		</collision>
 	</dynamic_object>
+
+	<static_object name="countertop">
+		<origin xyz="0.5 0.0 0.1" rpy="0 0 0" />
+
+		<visual>
+			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+			<geometry>
+				<mesh filename="${EXAMPLE_21_FOLDER}/countertop/shape/visual/countertop-epaijd-base_link.obj" scale="1.3 1.0 1.0" />
+			</geometry>
+		</visual>
+
+		<collision>
+			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+			<geometry>
+				<box size="1.0 3.0 0.06" />
+			</geometry>
+		</collision>
+
+	</static_object>
+
 
 
 	<!-- <static_object name="agveuv">
