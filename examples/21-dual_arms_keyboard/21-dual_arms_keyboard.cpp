@@ -122,7 +122,6 @@ int main() {
 	sim->setCoeffFrictionDynamic(5.0);
 
 	sim->setCollisionRestitution(0.2);
-	// sim->setCollisionRestitution(0.0);
 
 
 	// load graphics scene
@@ -176,11 +175,6 @@ int main() {
 		graphics->updateRobotGraphics(robot_name_2, sim->getJointPositions(robot_name_2));
 		graphics->updateRobotGraphics(robot_name_1, sim->getJointPositions(robot_name_1));	
 
-
-		UI_torques = graphics->getUITorques("Box1");
-		// graphics->updateObjectGraphics("Box1",
-		// 								   sim->getObjectPose("Box1"),
-		// 								   sim->getObjectVelocity("Box1"));
 		for (const auto& object_name : sim->getObjectNames()) {
 			graphics->updateObjectGraphics(object_name,
 										   sim->getObjectPose(object_name),
@@ -218,12 +212,6 @@ void runSim(shared_ptr<Sai2Simulation::Sai2Simulation> sim) {
 	while (fSimulationRunning) {
 		simTimer.waitForNextLoop();
 
-		// for (const auto& object_name : sim->getObjectNames()) {
-		// 	sim->setObjectForceTorque(object_name,
-		// 							  graphics->getUITorques(object_name));
-		// }
-		// // sim->integrate();
-
 		{
 			lock_guard<mutex> lock(mtx);
 			sim->setJointTorques(robot_name_1, robot_control_torques);
@@ -233,9 +221,6 @@ void runSim(shared_ptr<Sai2Simulation::Sai2Simulation> sim) {
 			lock_guard<mutex> lock(mtx);
 			sim->setJointTorques(robot_name_2, robot_control_torques_2);
 		}
-
-		sim->setObjectForceTorque("Box1",
-									  UI_torques);
 
 		sim->integrate();
 
