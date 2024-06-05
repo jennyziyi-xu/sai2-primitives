@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='us-ascii'?>
+<robot name="cjtadw">
+   <link name="base_link">
+      <visual>
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/visual/box_of_coffee-cjtadw-base_link.obj" scale="1.0 1.0 1.0" />
+         </geometry>
+      </visual>
+      <collision name="box_of_coffee-cjtadw-base_link-0">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/box_of_coffee-cjtadw-base_link-0.obj" scale="0.08302821086267453 0.1391501369596959 0.1908907554600001" />
+         </geometry>
+      </collision>
+   </link>
+</robot>

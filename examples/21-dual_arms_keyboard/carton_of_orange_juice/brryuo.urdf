@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='us-ascii'?>
+<robot name="brryuo">
+   <link name="base_link">
+      <visual>
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/visual/carton_of_orange_juice-brryuo-base_link.obj" scale="1.0 1.0 1.0" />
+         </geometry>
+      </visual>
+      <collision name="carton_of_orange_juice-brryuo-base_link-0">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/carton_of_orange_juice-brryuo-base_link-0.obj" scale="0.08415551758000017 0.12338867187999725 0.21804309082000006" />
+         </geometry>
+      </collision>
+   </link>
+</robot>

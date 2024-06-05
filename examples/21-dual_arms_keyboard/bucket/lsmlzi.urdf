@@ -1,0 +1,203 @@
+<?xml version='1.0' encoding='us-ascii'?>
+<robot name="lsmlzi">
+   <link name="base_link">
+      <visual>
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/visual/bucket-lsmlzi-base_link.obj" scale="1.0 1.0 1.0" />
+         </geometry>
+      </visual>
+      <collision name="bucket-lsmlzi-base_link-0">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-0.obj" scale="0.22386923439999995 0.22329397606000007 0.018901079729999992" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-1">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-1.obj" scale="0.04057529284999939 0.08743863126 0.09198595724" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-2">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-2.obj" scale="0.07508405975000043 0.04479395494999999 0.09199328160999999" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-3">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-3.obj" scale="0.05083649005999913 0.05184011288000001 0.08145161748000002" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-4">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-4.obj" scale="0.03290879435999994 0.057219764429999986 0.08148418501999999" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-5">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-5.obj" scale="0.05911844082999984 0.028093471150000018 0.08146333691999999" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-6">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-6.obj" scale="0.05935224194999967 0.028057906709999997 0.08146063091" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-7">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-7.obj" scale="0.05107685322000055 0.051928462950000025 0.08145098661" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-8">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-8.obj" scale="0.03294756968999968 0.05729171800000002 0.08148553864" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-9">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-9.obj" scale="0.03487113118000007 0.06051414523999999 0.08147653244" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-10">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-10.obj" scale="0.0483832494400005 0.04814321486000001 0.08145072215000004" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-11">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-11.obj" scale="0.058514203489999694 0.02830817991000001 0.08144894082999998" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-12">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-12.obj" scale="0.035494744780000254 0.06131198383000002 0.08147673923000001" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-13">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-13.obj" scale="0.04953791340999958 0.04819097743999998 0.08145031059000002" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-14">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-14.obj" scale="0.04729229819999947 0.032754413689999984 0.09282711467" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-15">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-15.obj" scale="0.05995180899000019 0.03358969689000002 0.08148189928999999" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-16">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-16.obj" scale="0.040398373700000434 0.019869725579999997 0.011209348610000003" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-17">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-17.obj" scale="0.020013064259999602 0.03604189669000002 0.02807922631000001" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-18">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-18.obj" scale="0.0209820566400003 0.08108778116999997 0.09283761809999999" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-19">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-19.obj" scale="0.06606159962000024 0.06685657934 0.08792981732999999" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-20">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-20.obj" scale="0.029856835279999498 0.034123745280000006 0.08391045711999999" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-21">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-21.obj" scale="0.04194964183000005 0.017461457220000004 0.08792919140000001" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-22">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-22.obj" scale="0.02992028244999956 0.03416502582 0.08391046659000001" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-23">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-23.obj" scale="0.018265892879999246 0.030863799640000023 0.02467943781999998" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-24">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-24.obj" scale="0.03918938485999979 0.018340028730000013 0.011126516370000034" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-25">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-25.obj" scale="0.07322749793000005 0.006014817959999974 0.03571968334000003" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-26">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-26.obj" scale="0.04332915310999974 0.02237231585999999 0.09282698109000001" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-27">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-27.obj" scale="0.01819793033000039 0.030718133099999993 0.024733094219999974" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-28">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-28.obj" scale="0.022594050659999976 0.04114109033000002 0.09282694906" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-29">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-29.obj" scale="0.035778477790000096 0.006178164480000026 0.03666731268000001" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-30">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-30.obj" scale="0.01704797924000001 0.030703365789999992 0.02469298385999999" />
+         </geometry>
+      </collision>
+      <collision name="bucket-lsmlzi-base_link-31">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/bucket-lsmlzi-base_link-31.obj" scale="0.08789186264999982 0.04113062858999997 0.09283016312" />
+         </geometry>
+      </collision>
+   </link>
+</robot>

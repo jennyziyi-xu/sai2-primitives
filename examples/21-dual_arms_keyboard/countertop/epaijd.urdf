@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='us-ascii'?>
+<robot name="epaijd">
+   <link name="base_link">
+      <visual>
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/visual/countertop-epaijd-base_link.obj" scale="1.0 1.0 1.0" />
+         </geometry>
+      </visual>
+      <collision name="countertop-epaijd-base_link-0">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/countertop-epaijd-base_link-0.obj" scale="0.6349019720031635 2.6908426686413467 0.08850108607999996" />
+         </geometry>
+      </collision>
+      <collision name="countertop-epaijd-base_link-1">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/countertop-epaijd-base_link-1.obj" scale="0.15023902156467983 0.8315671003415055 0.0885001443900002" />
+         </geometry>
+      </collision>
+      <collision name="countertop-epaijd-base_link-2">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/countertop-epaijd-base_link-2.obj" scale="0.11943592154598727 0.4869550356280854 0.08784334273000005" />
+         </geometry>
+      </collision>
+      <collision name="countertop-epaijd-base_link-3">
+         <origin xyz="0.0 0.0 0.0" />
+         <geometry>
+            <mesh filename="shape/collision/countertop-epaijd-base_link-3.obj" scale="0.48466132040794285 0.34461223813556074 0.08850043983000022" />
+         </geometry>
+      </collision>
+   </link>
+</robot>
