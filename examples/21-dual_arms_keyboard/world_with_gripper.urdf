@@ -81,7 +81,7 @@
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<geometry>
-				<mesh filename="${EXAMPLE_21_FOLDER}/bucket/shape/visual/bucket-lsmlzi-base_link.obj" scale="1.3 1.0 1.0" />
+				<mesh filename="${EXAMPLE_21_FOLDER}/bucket/shape/visual/bucket-lsmlzi-base_link.obj" scale="1.3 1.3 0.8" />
 			</geometry>
 		</visual>
 	</static_object>
@@ -92,7 +92,7 @@
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<geometry>
-				<mesh filename="${EXAMPLE_21_FOLDER}/bucket/shape/visual/bucket-lsmlzi-base_link.obj" scale="1.3 1.0 1.0" />
+				<mesh filename="${EXAMPLE_21_FOLDER}/bucket/shape/visual/bucket-lsmlzi-base_link.obj" scale="1.3 1.3 0.8" />
 			</geometry>
 		</visual>
 	</static_object>
@@ -121,13 +121,36 @@
 		</collision>
 	</dynamic_object>
 
+	<dynamic_object name="box_of_coffee">
 
-	<!-- <static_object name="Box">
-		<origin xyz="0.5 -0.1 0.25" rpy="0.0 0.0 0.0" />
+		<origin xyz="0.6 -0.2 0.28" rpy="0 0 0" />
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<geometry>
-				<box size="0.03 0.06 0.2" />
+				<mesh filename="${EXAMPLE_21_FOLDER}/box_of_coffee/shape/visual/box_of_coffee-cjtadw-base_link.obj" scale="1.0 1.0 1.0" />
+			</geometry>
+		</visual>
+		<collision>
+			<origin xyz="0.0 0.0 -0.02" rpy="0 0 0" />
+			<geometry>
+				<box size="0.07 0.14 0.18"/>
+			</geometry>
+		</collision>
+
+		<inertial>
+			<origin xyz="0.0 0.0 -0.02" rpy="0 0 0" />
+			<mass value="1" />
+			<inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0" />
+		</inertial>
+	</dynamic_object>
+
+
+	<!-- <static_object name="Box">
+		<origin xyz="0.6 -0.2 0.28" rpy="0.0 0.0 0.0" />
+		<visual>
+			<origin xyz="0.0 0.0 -0.02" rpy="0 0 0" />
+			<geometry>
+				<box size="0.07 0.14 0.18" />
 			</geometry>
 			<material name="material_blue">
 				<color rgba="0.20 0.47 1.00 1.0" />
