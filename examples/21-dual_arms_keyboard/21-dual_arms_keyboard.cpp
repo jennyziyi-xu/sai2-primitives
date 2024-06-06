@@ -108,6 +108,7 @@ int main_thread_itr = 0;
 
 std::atomic<bool> gripper_hold_obj_1 = false;
 std::atomic<bool> gripper_hold_obj_2 = false;
+float delta_xyz_norm = 0.03;
 
 // UI torques
 // Vector6d UI_torques = Eigen::VectorXd::Zero(6);
@@ -200,12 +201,12 @@ int main() {
 		}
 
 		// Mutex block to safely read the key states
-		key_Q_pressed = key_pressed.at(GLFW_KEY_Q);
-		key_W_pressed = key_pressed.at(GLFW_KEY_W);
-		key_E_pressed = key_pressed.at(GLFW_KEY_E);
-		key_R_pressed = key_pressed.at(GLFW_KEY_R);
-		key_X_pressed = key_pressed.at(GLFW_KEY_X);
-		key_C_pressed = key_pressed.at(GLFW_KEY_C);
+		key_Q_pressed = key_pressed.at(GLFW_KEY_Q) && !key_was_pressed.at(GLFW_KEY_Q);
+		key_W_pressed = key_pressed.at(GLFW_KEY_W) && !key_was_pressed.at(GLFW_KEY_W);
+		key_E_pressed = key_pressed.at(GLFW_KEY_E) && !key_was_pressed.at(GLFW_KEY_E);
+		key_R_pressed = key_pressed.at(GLFW_KEY_R) && !key_was_pressed.at(GLFW_KEY_R);
+		key_X_pressed = key_pressed.at(GLFW_KEY_X) && !key_was_pressed.at(GLFW_KEY_X);
+		key_C_pressed = key_pressed.at(GLFW_KEY_C) && !key_was_pressed.at(GLFW_KEY_C);
 		key_J_pressed = key_pressed.at(GLFW_KEY_J) && !key_was_pressed.at(GLFW_KEY_J);
 		key_L_pressed = key_pressed.at(GLFW_KEY_L) && !key_was_pressed.at(GLFW_KEY_L);
 		key_I_pressed = key_pressed.at(GLFW_KEY_I) && !key_was_pressed.at(GLFW_KEY_I);
@@ -222,14 +223,14 @@ int main() {
 
 		if (key_board_only) {
 			// Move in Z direction --  Q (UP) and W (DOWN)
-			if (key_Q_pressed) {local_delta_xyz = 0.01 * Vector3d::UnitZ();}
-			else if (key_W_pressed) {local_delta_xyz = -0.01 * Vector3d::UnitZ();}
+			if (key_Q_pressed) {local_delta_xyz = delta_xyz_norm * Vector3d::UnitZ();}
+			else if (key_W_pressed) {local_delta_xyz = -delta_xyz_norm * Vector3d::UnitZ();}
 			// Move in Y direction -- E (Y+) and R (Y-)
-			if (key_E_pressed) {local_delta_xyz = 0.01 * Vector3d::UnitY();}
-			else if (key_R_pressed) {local_delta_xyz = -0.01 * Vector3d::UnitY();}
+			if (key_E_pressed) {local_delta_xyz = delta_xyz_norm * Vector3d::UnitY();}
+			else if (key_R_pressed) {local_delta_xyz = -delta_xyz_norm * Vector3d::UnitY();}
 			// Move in X direction -- X (X+) and C (X-)
-			if (key_X_pressed) {local_delta_xyz = 0.01 * Vector3d::UnitX();}
-			else if (key_C_pressed) {local_delta_xyz = -0.01 * Vector3d::UnitX();}
+			if (key_X_pressed) {local_delta_xyz = delta_xyz_norm * Vector3d::UnitX();}
+			else if (key_C_pressed) {local_delta_xyz = -delta_xyz_norm * Vector3d::UnitX();}
 		}
 		else {
 			// dummy non-zero delta xyz to be used as a signal for 
