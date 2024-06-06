@@ -92,8 +92,8 @@ double kv_gripper = 20.0;	// 200
 bool robot_1_is_under_control = true;
 bool robot_1_was_under_control = false;
 
-bool key_board_only = true;
-// bool key_board_only = false;
+// bool key_board_only = true;
+bool key_board_only = false;
 
 // nearest object
 string nearest_obj_name_1 = "Box1";
@@ -106,6 +106,8 @@ Matrix3d initial_orientation;
 // for synchronizing between threads
 int main_thread_itr = 0;
 
+std::atomic<bool> gripper_hold_obj_1 = false;
+std::atomic<bool> gripper_hold_obj_2 = false;
 float delta_xyz_norm = 0.03;
 
 // UI torques
@@ -135,6 +137,8 @@ int main() {
 	sim->setCoeffFrictionDynamic(1.0);
 
 	sim->setCollisionRestitution(0.2);
+	// sim->setCollisionRestitution(1.0);
+
 	// sim->setCollisionRestitution(0.0);
 
 
@@ -675,16 +679,56 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 			Vector3d obj_pos_in_link = T_link_base * obj_pose_in_robot_base.translation();
 			Jv = robot->Jv(link_name, obj_pos_in_link);
 
+			// if ( (robot_name == robot_name_1) && (!gripper_1_is_open) ) {
+			// 	gripper_hold_obj = true;
+			// 	obj_projected_torques = -1 * Jv.transpose() * force;
+			// } else if ( (robot_name == robot_name_2) && (!gripper_2_is_open) ) {
+			// 	gripper_hold_obj = true;
+			// 	obj_projected_torques = -1 * Jv.transpose() * force;
+			// } else {
+			// 	gripper_hold_obj = false;
+			// 	obj_projected_torques.setZero();
+			// }
+
 			if ( (robot_name == robot_name_1) && (!gripper_1_is_open) ) {
 				gripper_hold_obj = true;
-				obj_projected_torques = -1 * Jv.transpose() * force;
 			} else if ( (robot_name == robot_name_2) && (!gripper_2_is_open) ) {
 				gripper_hold_obj = true;
-				obj_projected_torques = -1 * Jv.transpose() * force;
 			} else {
 				gripper_hold_obj = false;
-				obj_projected_torques.setZero();
 			}
+
+			if (robot_name == robot_name_1) {
+				gripper_hold_obj_1 = gripper_hold_obj;
+			}
+			else if (robot_name == robot_name_1) {
+				gripper_hold_obj_2 = gripper_hold_obj;
+			}
+
+			float compensate_factor;
+			if ((robot_name == robot_name_2) && (gripper_hold_obj_1) && (gripper_hold_obj_2)) {
+				compensate_factor = 0.0;
+			} else {
+				compensate_factor = 1.0;
+			}
+			// if (((robot_name == robot_name_1) && !gripper_hold_obj_1) || ((robot_name == robot_name_2) && !gripper_hold_obj_2)){
+			// 	compensate_factor = 0.;
+			// } else if (gripper_hold_obj_1 && gripper_hold_obj_2) {
+			// 	compensate_factor = 0.5;
+			// 	cout << "both holding" << endl;
+
+			// } else {
+			// 	compensate_factor = 1.0;
+			// }
+
+			obj_projected_torques = -compensate_factor * Jv.transpose() * force;
+		}
+
+		if (robot_name == robot_name_1) {
+			gripper_hold_obj_1 = gripper_hold_obj;
+		}
+		else if (robot_name == robot_name_1) {
+			gripper_hold_obj_2 = gripper_hold_obj;
 		}
 
 
