@@ -241,10 +241,10 @@
 	
 
 
-	<static_object name="Box_wall_left">
+	<!-- <static_object name="Box_wall_left">
 		<origin xyz="0.4 -0.62 0.165" rpy="0.0 0.0 0.0" />
 		<visual>
-			<!-- right side wall -->
+			
 			<origin xyz="0.0 0.18 0" rpy="0 0 0" />
 			<geometry>
 				<box size="0.26 0.06 0.1" />
@@ -256,7 +256,7 @@
 		</visual>
 
 		<visual>
-			 <!-- left side wall -->
+			 
 			<origin xyz="0.0 -0.18 0" rpy="0 0 0" />
 			<geometry>
 				<box size="0.26 0.08 0.1" />
@@ -267,7 +267,7 @@
 		</visual>
 
 		<visual>
-			<!-- front wall -->
+			
 			<origin xyz="0.16 0 0" rpy="0 0 0" />
 			<geometry>
 				<box size="0.06 0.28 0.1" />
@@ -278,7 +278,7 @@
 		</visual>
 
 		<visual>
-			<!-- Back wall -->
+			
 			<origin xyz="-0.16 0 0" rpy="0 0 0" />
 			<geometry>
 				<box size="0.06 0.28 0.1" />
@@ -287,7 +287,7 @@
 				<color rgba="0.20 0.47 1.00 1.0" />
 			</material>
 		</visual>
-	</static_object>
+	</static_object> -->
 
 	
 
@@ -390,7 +390,7 @@
 
 
 	<dynamic_object name='baguette'>
-		<origin xyz="0.4 -0.56 0.28" rpy="1.2 0 0" />
+		<origin xyz="0.45 -0.56 0.28" rpy="1.2 0 0" />
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<geometry>

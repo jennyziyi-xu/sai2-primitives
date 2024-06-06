@@ -92,8 +92,8 @@ double kv_gripper = 20.0;	// 200
 bool robot_1_is_under_control = true;
 bool robot_1_was_under_control = false;
 
-bool key_board_only = true;
-// bool key_board_only = false;
+// bool key_board_only = true;
+bool key_board_only = false;
 
 // nearest object
 string nearest_obj_name_1 = "Box1";
