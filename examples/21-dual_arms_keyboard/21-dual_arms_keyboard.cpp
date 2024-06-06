@@ -90,12 +90,24 @@ double kv_gripper = 20.0;	// 200
 
 // How to switch between the two robots
 bool robot_1_is_under_control = true;
+bool robot_1_was_under_control = false;
 
 bool key_board_only = true;
 // bool key_board_only = false;
 
+// nearest object
+string nearest_obj_name_1 = "Box1";
+string nearest_obj_name_2 = "Box1";
+const Vector3d control_point = Vector3d(0, 0, 0.27);
+
+// initial kinematic data
+Matrix3d initial_orientation;
+
+// for synchronizing between threads
+int main_thread_itr = 0;
+
 // UI torques
-Vector6d UI_torques = Eigen::VectorXd::Zero(6);
+// Vector6d UI_torques = Eigen::VectorXd::Zero(6);
 
 int main() {
 	Sai2Model::URDF_FOLDERS["EXAMPLE_21_FOLDER"] =
@@ -139,6 +151,8 @@ int main() {
 	robot->setQ(sim->getJointPositions(robot_name_1));
 	robot->setDq(sim->getJointVelocities(robot_name_1));
 	robot->updateModel();
+
+	initial_orientation = robot->rotation("link7");
 
 	// [2] for robot_name_2
 	const Affine3d T_world_robot_2 = sim->getRobotBaseTransform(robot_name_2);
@@ -187,12 +201,12 @@ int main() {
 		key_R_pressed = key_pressed.at(GLFW_KEY_R);
 		key_X_pressed = key_pressed.at(GLFW_KEY_X);
 		key_C_pressed = key_pressed.at(GLFW_KEY_C);
-		key_J_pressed = key_pressed.at(GLFW_KEY_J);
-		key_L_pressed = key_pressed.at(GLFW_KEY_L);
-		key_I_pressed = key_pressed.at(GLFW_KEY_I);
-		key_K_pressed = key_pressed.at(GLFW_KEY_K);
-		key_N_pressed = key_pressed.at(GLFW_KEY_N);
-		key_M_pressed = key_pressed.at(GLFW_KEY_M);
+		key_J_pressed = key_pressed.at(GLFW_KEY_J) && !key_was_pressed.at(GLFW_KEY_J);
+		key_L_pressed = key_pressed.at(GLFW_KEY_L) && !key_was_pressed.at(GLFW_KEY_L);
+		key_I_pressed = key_pressed.at(GLFW_KEY_I) && !key_was_pressed.at(GLFW_KEY_I);
+		key_K_pressed = key_pressed.at(GLFW_KEY_K) && !key_was_pressed.at(GLFW_KEY_K);
+		key_N_pressed = key_pressed.at(GLFW_KEY_N) && !key_was_pressed.at(GLFW_KEY_N);
+		key_M_pressed = key_pressed.at(GLFW_KEY_M) && !key_was_pressed.at(GLFW_KEY_M);
 		key_G_pressed = key_pressed.at(GLFW_KEY_G);
 		key_B_pressed = key_pressed.at(GLFW_KEY_B);
 		key_B_was_pressed = key_was_pressed.at(GLFW_KEY_B);
@@ -201,15 +215,22 @@ int main() {
 		local_delta_xyz.setZero();
 		local_delta_rot.setZero();
 
-		// Move in Z direction --  Q (UP) and W (DOWN)
-		if (key_Q_pressed) {local_delta_xyz = 0.01 * Vector3d::UnitZ();}
-		else if (key_W_pressed) {local_delta_xyz = -0.01 * Vector3d::UnitZ();}
-		// Move in Y direction -- E (Y+) and R (Y-)
-		if (key_E_pressed) {local_delta_xyz = 0.01 * Vector3d::UnitY();}
-		else if (key_R_pressed) {local_delta_xyz = -0.01 * Vector3d::UnitY();}
-		// Move in X direction -- X (X+) and C (X-)
-		if (key_X_pressed) {local_delta_xyz = 0.01 * Vector3d::UnitX();}
-		else if (key_C_pressed) {local_delta_xyz = -0.01 * Vector3d::UnitX();}
+		if (key_board_only) {
+			// Move in Z direction --  Q (UP) and W (DOWN)
+			if (key_Q_pressed) {local_delta_xyz = 0.01 * Vector3d::UnitZ();}
+			else if (key_W_pressed) {local_delta_xyz = -0.01 * Vector3d::UnitZ();}
+			// Move in Y direction -- E (Y+) and R (Y-)
+			if (key_E_pressed) {local_delta_xyz = 0.01 * Vector3d::UnitY();}
+			else if (key_R_pressed) {local_delta_xyz = -0.01 * Vector3d::UnitY();}
+			// Move in X direction -- X (X+) and C (X-)
+			if (key_X_pressed) {local_delta_xyz = 0.01 * Vector3d::UnitX();}
+			else if (key_C_pressed) {local_delta_xyz = -0.01 * Vector3d::UnitX();}
+		}
+		else {
+			// dummy non-zero delta xyz to be used as a signal for 
+			local_delta_xyz.setZero(); 
+		}
+		
 		// rotate about X-axis -- J (+) and L (-)
 		if (key_J_pressed) {local_delta_rot(0) = + M_PI / 30.0;}
 		else if (key_L_pressed) {local_delta_rot(0) = - M_PI / 30.0;}
@@ -221,11 +242,11 @@ int main() {
 		else if (key_M_pressed) {local_delta_rot(2) = - M_PI / 30.0;}
 
 
-
 		{
 			lock_guard<mutex> lock(key_mtx);
 
 			// Which robot is under control
+			robot_1_was_under_control = robot_1_is_under_control;
 			if (key_B_pressed && !key_B_was_pressed) {
 				robot_1_is_under_control = !robot_1_is_under_control;
 				cout << "Key B is pressed - switching Robot, robot_1_is_under_control=" << robot_1_is_under_control << endl;
@@ -267,13 +288,38 @@ int main() {
 			}
 		}
 
+		main_thread_itr += 1;
 		key_was_pressed = key_pressed;
+
+		map<double, string> distance_1;
+		for (const auto& object_name : sim->getObjectNames()) {
+			Eigen::Affine3d obj_pose_in_world = sim->getObjectPose(object_name);
+			Eigen::Affine3d obj_pose_in_robot_base = T_world_robot.inverse() * obj_pose_in_world;
+			Eigen::Affine3d T_link_base = robot->transform(link_name).inverse();
+			Eigen::Vector3d obj_pos_in_link = T_link_base * obj_pose_in_robot_base.translation() - control_point;
+			double dist = obj_pos_in_link.norm();
+			distance_1.insert({dist, object_name});
+		}
+		auto it_1 = distance_1.begin();
+		nearest_obj_name_1 = it_1->second;
+
+		map<double, string> distance_2;
+		for (const auto& object_name : sim->getObjectNames()) {
+			Eigen::Affine3d obj_pose_in_world = sim->getObjectPose(object_name);
+			Eigen::Affine3d obj_pose_in_robot_base = T_world_robot_2.inverse() * obj_pose_in_world;
+			Eigen::Affine3d T_link_base = robot_2->transform(link_name).inverse();
+			Eigen::Vector3d obj_pos_in_link = T_link_base * obj_pose_in_robot_base.translation() - control_point;
+			double dist = obj_pos_in_link.norm();
+			distance_2.insert({dist, object_name});
+		}
+		auto it_2 = distance_2.begin();
+		nearest_obj_name_2 = it_2->second;
 
 		graphics->updateRobotGraphics(robot_name_2, sim->getJointPositions(robot_name_2));
 		graphics->updateRobotGraphics(robot_name_1, sim->getJointPositions(robot_name_1));	
 
 
-		UI_torques = graphics->getUITorques("Box1");
+		// UI_torques = graphics->getUITorques("Box1");
 		// graphics->updateObjectGraphics("Box1",
 		// 								   sim->getObjectPose("Box1"),
 		// 								   sim->getObjectVelocity("Box1"));
@@ -322,8 +368,8 @@ void runSim(shared_ptr<Sai2Simulation::Sai2Simulation> sim) {
 			sim->setJointTorques(robot_name_2, robot_control_torques_2);
 		}
 
-		sim->setObjectForceTorque("Box1",
-									  UI_torques);
+		// sim->setObjectForceTorque("Box1",
+		// 							  UI_torques);
 
 		sim->integrate();
 
@@ -373,6 +419,11 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 	gripper_task->setGains(kp_gripper, kv_gripper, 0);
 	gripper_task->setGoalPosition(gripper_goal_open);
 
+	// arm posture task
+	MatrixXd joint_selection_matrix = MatrixXd::Zero(7, robot->dof());
+	joint_selection_matrix.block(0, 0, 7, 7).setIdentity();
+	auto arm_posture_task = std::make_shared<Sai2Primitives::JointTask>(robot, joint_selection_matrix);
+
 	// joint task
 	int dof = robot->dof();
 	MatrixXd N_prec = MatrixXd::Identity(dof, dof);
@@ -383,8 +434,6 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 	// q_desired.head(7) *= M_PI / 180.0;
 	// q_desired.tail(2) << 0.04, -0.04;
 	// joint_task->setGoalPosition(q_desired);
-
-	Vector3d prev_sensed_force = Vector3d::Zero();
 
 	// Include joint_task in the task list as well?
 	vector<shared_ptr<Sai2Primitives::TemplateTask>> task_list = {
@@ -451,13 +500,15 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 	bool gripper_hold_obj = false;
 	MatrixXd Jv = MatrixXd::Zero(3,dof);
 	Vector3d gravity = Vector3d(0, 0, -9.8);
-	float mass = 1;
+	float mass = 0.2;
 	Vector3d force = gravity * mass;
 	VectorXd obj_projected_torques = Eigen::VectorXd::Zero(9);
 
 	Matrix3d init_rot = robot->rotationInWorld(link_name);
 	// Matrix3d init_rot = robot->rotationInWorld(link_name, control_point);
 	Matrix3d goal_rot = init_rot;
+	// cout << goal_rot << endl;
+	Matrix3d delta_rot = Matrix3d::Identity();
 
 	Vector3d init_xyz = robot->positionInWorld(link_name, control_point);
 	Vector3d goal_xyz = init_xyz;
@@ -465,7 +516,15 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 	VectorXd local_delta_xyz = Eigen::VectorXd::Zero(3);
 	VectorXd local_delta_rot = Eigen::VectorXd::Zero(3);
 
+	Matrix3d orientation_after_transition = robot->rotation("link7");
+	int local_main_thread_itr = -1;
+
 	bool local_gripper_is_open = true;
+
+	string local_nearest_obj_name = "Box1";
+
+	bool local_is_under_control = false;
+	bool local_was_under_control = true;
 
 	while (fSimulationRunning) {
 		// wait for next scheduled loop
@@ -477,6 +536,7 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		robot->updateModel();
 
 		robot_controller->updateControllerTaskModels();
+		arm_posture_task->updateTaskModel(motion_force_task->getTaskAndPreviousNullspace());
 
 		// read haptic device state from redis
 		redis_client.receiveAllFromGroup();
@@ -493,6 +553,8 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 			haptic_controller->getHomed() && haptic_button_is_pressed) {
 			haptic_controller->setHapticControlType(
 				Sai2Primitives::HapticControlType::MOTION_MOTION);
+			// haptic_controller->setHapticControlType(
+			// 	Sai2Primitives::HapticControlType::CLUTCH);
 			haptic_controller->setDeviceControlGains(200.0, 15.0);
 			cout << "haptic device homed" << endl;
 		}
@@ -501,59 +563,99 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		local_delta_rot.setZero();
 
 		// Read the local_delta_xyz and local_delta_rot from global variables
-		if (robot_name == robot_name_1) {
+		if ((robot_name == robot_name_1) && (local_main_thread_itr != main_thread_itr)) {
 			local_delta_xyz = delta_xyz_1;
 			local_delta_rot = delta_rot_1;
 			local_gripper_is_open = gripper_1_is_open;
-		} else if (robot_name == robot_name_2) {
+			local_nearest_obj_name = nearest_obj_name_1;
+
+			// local_was_under_control = local_is_under_control;
+			local_is_under_control = robot_1_is_under_control;
+		} else if (robot_name == robot_name_2 && (local_main_thread_itr != main_thread_itr)) {
 			local_delta_xyz = delta_xyz_2;
 			local_delta_rot = delta_rot_2;
 			local_gripper_is_open = gripper_2_is_open;
+			local_nearest_obj_name = nearest_obj_name_2;
+
+			// local_was_under_control = local_is_under_control;
+			local_is_under_control = !robot_1_is_under_control;
 		}
+		local_main_thread_itr = main_thread_itr;
+
+		if (haptic_controller->getHapticControlType() ==
+			Sai2Primitives::HapticControlType::MOTION_MOTION &&
+			((haptic_button_is_pressed && !haptic_button_was_pressed))) {
+			haptic_controller->setHapticControlType(
+				Sai2Primitives::HapticControlType::CLUTCH);
+		} else if (haptic_controller->getHapticControlType() ==
+					Sai2Primitives::HapticControlType::CLUTCH &&
+				!haptic_button_is_pressed && haptic_button_was_pressed) {
+			haptic_controller->setHapticControlType(
+				Sai2Primitives::HapticControlType::MOTION_MOTION);
+		} 
+
+		haptic_button_was_pressed = haptic_button_is_pressed;
 
 		// Update the goal position and orientation
-		goal_xyz = robot->positionInWorld(link_name, control_point);
-		goal_rot = robot->rotationInWorld(link_name);
-		// goal_rot = robot->rotationInWorld(link_name, control_point);
+		// goal_xyz = robot->positionInWorld(link_name, control_point);
+		// goal_rot = robot->rotationInWorld(link_name);
 
 		goal_xyz = goal_xyz + local_delta_xyz;
-		goal_rot = 
-				AngleAxisd( local_delta_rot(0) , Vector3d::UnitX()).toRotationMatrix() *
-				goal_rot;
-		goal_rot = 
-				AngleAxisd( local_delta_rot(1) , Vector3d::UnitY()).toRotationMatrix() *
-				goal_rot;
-		goal_rot = 
-				AngleAxisd( local_delta_rot(2) , Vector3d::UnitZ()).toRotationMatrix() *
-				goal_rot;
+		// goal_rot = 
+		// 		AngleAxisd( local_delta_rot(0) , Vector3d::UnitX()).toRotationMatrix() *
+		// 		goal_rot;
+		// goal_rot = 
+		// 		AngleAxisd( local_delta_rot(1) , Vector3d::UnitY()).toRotationMatrix() *
+		// 		goal_rot;
+		// goal_rot = 
+		// 		AngleAxisd( local_delta_rot(2) , Vector3d::UnitZ()).toRotationMatrix() *
+		// 		goal_rot;
+		delta_rot = AngleAxisd( local_delta_rot(2) , Vector3d::UnitZ()).toRotationMatrix() * \
+					AngleAxisd( local_delta_rot(1) , Vector3d::UnitY()).toRotationMatrix() * \
+					AngleAxisd( local_delta_rot(0) , Vector3d::UnitX()).toRotationMatrix();
+		// delta_rot = temp_delta_rot * delta_rot;
+		goal_rot = delta_rot * goal_rot;
 
-		// if (actively_controlled) {			
-		if (key_board_only) {
-			motion_force_task->setGoalPosition(goal_xyz);
-			motion_force_task->setGoalOrientation(goal_rot);
-		} else {
-			// compute haptic control
-			haptic_input.robot_position = robot->positionInWorld(link_name, control_point);
-			haptic_input.robot_orientation = robot->rotationInWorld(link_name);
-			haptic_input.robot_linear_velocity =
-				robot->linearVelocityInWorld(link_name);
-			haptic_input.robot_angular_velocity =
-				robot->angularVelocityInWorld(link_name);
-			haptic_input.robot_sensed_force =
-				motion_force_task->getSensedForceControlWorldFrame();
-			haptic_input.robot_sensed_moment =
-				motion_force_task->getSensedMomentControlWorldFrame();
-
-			haptic_output = haptic_controller->computeHapticControl(haptic_input);
-
-			motion_force_task->setGoalPosition(haptic_output.robot_goal_position);
-			motion_force_task->setGoalOrientation(goal_rot);
-			// motion_force_task->setGoalOrientation(
-			// 	haptic_output.robot_goal_orientation);
-		}
-		// } else {
-		// 	motion_force_task->reInitializeTask();
+		// if ((robot_name == robot_name_1) && (delta_rot != Matrix3d::Identity())){
+		// 	std::cout << "delta rotation\n" << delta_rot << "\n";
+		// 	// std::cout << "init rotation\n" << init_rot << "\n";
+		// 	std::cout << "goal rotation\n" << goal_rot << "\n";
+		// 	// cout << "temp delta rot" << temp_delta_rot << endl;
 		// }
+		
+
+		// if (actively_controlled) {	
+		if (local_is_under_control) {
+			if (key_board_only) {
+				motion_force_task->setGoalPosition(goal_xyz);
+				motion_force_task->setGoalOrientation(goal_rot);
+			} else {
+				// compute haptic control
+				haptic_input.robot_position = robot->positionInWorld(link_name, control_point);
+				haptic_input.robot_orientation = robot->rotationInWorld(link_name);
+				haptic_input.robot_linear_velocity =
+					robot->linearVelocityInWorld(link_name);
+				haptic_input.robot_angular_velocity =
+					robot->angularVelocityInWorld(link_name);
+				haptic_input.robot_sensed_force =
+					motion_force_task->getSensedForceControlWorldFrame();
+				haptic_input.robot_sensed_moment =
+					motion_force_task->getSensedMomentControlWorldFrame();
+
+				haptic_output = haptic_controller->computeHapticControl(haptic_input);
+
+				if (local_is_under_control) {
+					motion_force_task->setGoalPosition(haptic_output.robot_goal_position);
+				}
+				else {
+					motion_force_task->setGoalPosition(goal_xyz);
+				}
+				motion_force_task->setGoalOrientation(goal_rot);
+			}
+		}		
+		else if (local_was_under_control) {
+			motion_force_task->reInitializeTask();
+		}
 
 		// gripper control
 		if (local_gripper_is_open) {gripper_task->setGoalPosition(gripper_goal_open);}
@@ -565,7 +667,7 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		if (robot->q()(7) > 0.015) {
 			// Jv = robot->Jv(link_name, control_point);
 			
-			Eigen::Affine3d obj_pose_in_world = sim->getObjectPose("Box2");
+			Eigen::Affine3d obj_pose_in_world = sim->getObjectPose(local_nearest_obj_name);
 			Eigen::Affine3d obj_pose_in_robot_base = T_robot_world * obj_pose_in_world;
 			Eigen::Affine3d T_link_base = robot->transform(link_name).inverse();
 			Vector3d obj_pos_in_link = T_link_base * obj_pose_in_robot_base.translation();
@@ -601,11 +703,11 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		{
 			lock_guard<mutex> lock(mtx);
 			if (robot_name == robot_name_1) {
-				robot_control_torques = robot_controller->computeControlTorques() + gripper_task->computeTorques() + obj_projected_torques;
+				robot_control_torques = robot_controller->computeControlTorques() + gripper_task->computeTorques() + obj_projected_torques + arm_posture_task->computeTorques();
 			}
 
 			if (robot_name == robot_name_2) {
-				robot_control_torques_2 = robot_controller->computeControlTorques() + gripper_task->computeTorques() + obj_projected_torques;
+				robot_control_torques_2 = robot_controller->computeControlTorques() + gripper_task->computeTorques() + obj_projected_torques + arm_posture_task->computeTorques();
 			}
 			
 		}
@@ -615,19 +717,21 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 			POPC_teleop->computeAdditionalHapticDampingForce();
 		haptic_output.device_command_force += POPC_force_moment.first;
 
-		if (haptic_controller->getHapticControlType() ==
-				Sai2Primitives::HapticControlType::MOTION_MOTION &&
-			haptic_button_is_pressed && !haptic_button_was_pressed) {
-			haptic_controller->setHapticControlType(
-				Sai2Primitives::HapticControlType::CLUTCH);
-		} else if (haptic_controller->getHapticControlType() ==
-					Sai2Primitives::HapticControlType::CLUTCH &&
-				!haptic_button_is_pressed && haptic_button_was_pressed) {
-			haptic_controller->setHapticControlType(
-				Sai2Primitives::HapticControlType::MOTION_MOTION);
-		} 
+		// if (haptic_controller->getHapticControlType() ==
+		// 		Sai2Primitives::HapticControlType::MOTION_MOTION &&
+		// 	haptic_button_is_pressed && !haptic_button_was_pressed) {
+		// 	haptic_controller->setHapticControlType(
+		// 		Sai2Primitives::HapticControlType::CLUTCH);
+		// } else if (haptic_controller->getHapticControlType() ==
+		// 			Sai2Primitives::HapticControlType::CLUTCH &&
+		// 		!haptic_button_is_pressed && haptic_button_was_pressed) {
+		// 	haptic_controller->setHapticControlType(
+		// 		Sai2Primitives::HapticControlType::MOTION_MOTION);
+		// } 
 
-		haptic_button_was_pressed = haptic_button_is_pressed;
+		// haptic_button_was_pressed = haptic_button_is_pressed;
+
+		local_was_under_control = local_is_under_control;
 
 	}
 
