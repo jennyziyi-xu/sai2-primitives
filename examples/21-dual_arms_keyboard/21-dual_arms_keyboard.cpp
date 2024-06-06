@@ -181,8 +181,10 @@ int main() {
 
 
 				// determine if a new object has been added to the basket. 
-				// 1. compute how many objects are in the basket. 
+				
 				int count_objects = 0;
+
+				// 1. compute how many objects are in the right basket. 
 
 				Vector3d right_bucket_in_world(0.5, 0.6, 0.165);
 
@@ -192,6 +194,23 @@ int main() {
 						Vector3d obj_pose_in_world = sim->getObjectPose(object_name).translation();  // yes this is getting the values in the origin tag.
 
 						Vector3d obj_pos_in_link = (right_bucket_in_world - obj_pose_in_world).cwiseAbs();
+
+						if (obj_pos_in_link(0) < 0.18 && obj_pos_in_link(1) < 0.2 && obj_pos_in_link(2) < 0.1 ) {
+							count_objects++;
+						}
+					}
+				}
+
+				// compute how many objects are in the left basket. 
+
+				Vector3d left_bucket_in_world(0.5, -0.73, 0.165);
+
+				for (const auto& object_name : sim->getObjectNames()) {
+					if (object_name != "bucket-left"){
+
+						Vector3d obj_pose_in_world = sim->getObjectPose(object_name).translation();  // yes this is getting the values in the origin tag.
+
+						Vector3d obj_pos_in_link = (left_bucket_in_world - obj_pose_in_world).cwiseAbs();
 
 						if (obj_pos_in_link(0) < 0.18 && obj_pos_in_link(1) < 0.2 && obj_pos_in_link(2) < 0.1 ) {
 							count_objects++;
@@ -219,15 +238,11 @@ int main() {
 				graphics->updateObjectGraphics(object_name,
 											original_pose,
 											sim->getObjectVelocity(object_name));
-				
-
 			} else {
 				// Update for all other objects 
 				graphics->updateObjectGraphics(object_name,
 											sim->getObjectPose(object_name),
 											sim->getObjectVelocity(object_name));
-				
-				
 			}
 
 		}
