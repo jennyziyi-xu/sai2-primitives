@@ -99,6 +99,9 @@ bool key_board_only = true;
 bool keep_pressing_B_to_switch = false;
 Vector6d UI_torques = Eigen::VectorXd::Zero(6);
 
+int objects_in_basket = 0;
+int frame_countedown = 40;
+
 int main() {
 	Sai2Model::URDF_FOLDERS["EXAMPLE_21_FOLDER"] =
 		string(EXAMPLES_FOLDER) + "/21-dual_arms_keyboard";
@@ -166,20 +169,70 @@ int main() {
 			key_pressed[key.first] = graphics->isKeyPressed(key.first);
 		}
 
-		// if (key_pressed.at(GLFW_KEY_B)) {
-		// 	graphics->updateRobotGraphics(robot_name_2, sim->getJointPositions(robot_name_2));
-		// } else {
-		// 	graphics->updateRobotGraphics(robot_name_1, sim->getJointPositions(robot_name_1));	
-		// }
-
 		graphics->updateRobotGraphics(robot_name_2, sim->getJointPositions(robot_name_2));
 		graphics->updateRobotGraphics(robot_name_1, sim->getJointPositions(robot_name_1));	
 
 		for (const auto& object_name : sim->getObjectNames()) {
-			graphics->updateObjectGraphics(object_name,
-										   sim->getObjectPose(object_name),
-										   sim->getObjectVelocity(object_name));
+			
+			// do we show the nice-emoji? 
+
+			if (object_name == "emoji-nice") {
+				Affine3d original_pose = sim->getObjectPose(object_name);
+
+
+				// determine if a new object has been added to the basket. 
+				// 1. compute how many objects are in the basket. 
+				int count_objects = 0;
+
+				Vector3d right_bucket_in_world(0.5, 0.6, 0.165);
+
+				for (const auto& object_name : sim->getObjectNames()) {
+					if (object_name != "bucket-right"){
+
+						Vector3d obj_pose_in_world = sim->getObjectPose(object_name).translation();  // yes this is getting the values in the origin tag.
+
+						Vector3d obj_pos_in_link = (right_bucket_in_world - obj_pose_in_world).cwiseAbs();
+
+						if (obj_pos_in_link(0) < 0.18 && obj_pos_in_link(1) < 0.2 && obj_pos_in_link(2) < 0.1 ) {
+							count_objects++;
+						}
+					}
+				}
+
+				// 2, see if there's an increase compared to the variable objects_in_basket
+				if (count_objects > objects_in_basket) {
+					// if yes, do not move away the emoji . 
+					frame_countedown = 39;
+				} else {
+					
+					if (frame_countedown >= 40 || frame_countedown <= 0) {
+						// move away the emoji 
+						original_pose(0,3) = -20;   
+					} else {
+						// 3.1, if frame_countedown is < 100, then show the emoji, but decrease the countdown. 
+						frame_countedown --;   
+						
+					}
+				}
+				objects_in_basket = count_objects;
+
+				graphics->updateObjectGraphics(object_name,
+											original_pose,
+											sim->getObjectVelocity(object_name));
+				
+
+			} else {
+				// Update for all other objects 
+				graphics->updateObjectGraphics(object_name,
+											sim->getObjectPose(object_name),
+											sim->getObjectVelocity(object_name));
+				
+				
+			}
+
 		}
+
+
 
 		
 

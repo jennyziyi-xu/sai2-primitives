@@ -34,7 +34,7 @@
 	</static_object>
 
 	<dynamic_object name="apple">
-		<origin xyz="0.5 0.27 0.25" rpy="0.0 0.0 0.0" />
+		<origin xyz="0.6 0.27 0.25" rpy="0.0 0.0 0.0" />
 
 		<inertial>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
@@ -74,6 +74,33 @@
 		</collision>
 
 	</static_object>
+
+
+	<dynamic_object name="emoji-nice">
+		<origin xyz="0.8 0.7 0.28" rpy="0 1.57 0" />
+
+		<visual>
+			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+			<geometry>
+				<mesh filename="${EXAMPLE_21_FOLDER}/emoji-nice/shape/visual/picture-abtgvz-base_link.obj" scale="2.2 2.2 2.2" />
+			</geometry>
+		</visual>
+
+		<collision>
+			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />  
+			<geometry>
+				<box size="0.05 0.05 0.7" />
+			</geometry>
+		</collision>
+
+		<inertial>
+			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+			<mass value="1" />
+			<inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0" />
+		</inertial>
+
+	</dynamic_object>
+
 
 	<static_object name="bucket-left">
 		<origin xyz="0.5 -0.73 0.165" rpy="0 0 0" />
@@ -173,6 +200,30 @@
 			</geometry>
 		</collision>
 	</static_object>
+
+	<dynamic_object name="temp-object">
+		<origin xyz="0.5 0.6 0.165" rpy="0 0 0" />
+
+		<visual>
+			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+			<geometry>
+				<mesh filename="${EXAMPLE_21_FOLDER}/apple/shape/visual/apple-agveuv-base_link.obj" scale="1 1 1" />
+			</geometry>
+		</visual>
+
+		<collision>
+			<origin xyz="0.0 0 0.0" rpy="0 0 0" />  
+			<geometry>
+				<box size="0.06 0.06 0.06" />
+			</geometry>
+		</collision>
+
+		<inertial>
+			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+			<mass value="1" />
+			<inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0" />
+		</inertial>
+	</dynamic_object>
 
 	
 	<!-- <static_object name="Box_wall_right">
