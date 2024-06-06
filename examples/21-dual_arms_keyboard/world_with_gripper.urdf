@@ -402,7 +402,7 @@
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<geometry>
-				<mesh filename="${EXAMPLE_21_FOLDER}/background/shape/visual/picture-abtgvz-base_link.obj" scale="20 35 18" />
+				<mesh filename="${EXAMPLE_21_FOLDER}/background/shape/visual/picture-abtgvz-base_link.obj" scale="17 32 4" />
 			</geometry>
 		</visual>
 	</static_object>
