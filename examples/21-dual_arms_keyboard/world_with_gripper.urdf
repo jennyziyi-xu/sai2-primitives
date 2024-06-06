@@ -38,14 +38,14 @@
 
 		<inertial>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
-			<mass value="1" />
+			<mass value="0.5" />
 			<inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0" />
 		</inertial>
 
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<geometry>
-				<mesh filename="${EXAMPLE_21_FOLDER}/apple/shape/visual/apple-agveuv-base_link.obj" scale="0.8 0.8 0.8" />
+				<mesh filename="${EXAMPLE_21_FOLDER}/assets/apple/shape/visual/apple-agveuv-base_link.obj" scale="0.8 0.8 0.8" />
 			</geometry>
 		</visual>
 		<collision>
@@ -62,7 +62,7 @@
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<geometry>
-				<mesh filename="${EXAMPLE_21_FOLDER}/countertop/shape/visual/countertop-epaijd-base_link.obj" scale="1.3 1.0 1.0" />
+				<mesh filename="${EXAMPLE_21_FOLDER}/assets/countertop/shape/visual/countertop-epaijd-base_link.obj" scale="1.3 1.0 1.0" />
 			</geometry>
 		</visual>
 
@@ -80,7 +80,7 @@
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 3.14" />
 			<geometry>
-				<mesh filename="${EXAMPLE_21_FOLDER}/sink/shape/visual/sink-awvzkn-base_link.obj" scale="1.3 0.7 1.0" />
+				<mesh filename="${EXAMPLE_21_FOLDER}/assets/sink/shape/visual/sink-awvzkn-base_link.obj" scale="1.3 0.7 1.0" />
 			</geometry>
 		</visual>
 
@@ -95,7 +95,7 @@
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<geometry>
-				<mesh filename="${EXAMPLE_21_FOLDER}/emoji-nice/shape/visual/picture-abtgvz-base_link.obj" scale="2.2 2.2 2.2" />
+				<mesh filename="${EXAMPLE_21_FOLDER}/assets/emoji-nice/shape/visual/picture-abtgvz-base_link.obj" scale="2.2 2.2 2.2" />
 			</geometry>
 		</visual>
 
@@ -108,7 +108,7 @@
 
 		<inertial>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
-			<mass value="1" />
+			<mass value="0.5" />
 			<inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0" />
 		</inertial>
 
@@ -120,7 +120,7 @@
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<geometry>
-				<mesh filename="${EXAMPLE_21_FOLDER}/bucket/shape/visual/bucket-lsmlzi-base_link.obj" scale="1.6 1.6 0.5" />
+				<mesh filename="${EXAMPLE_21_FOLDER}/assets/bucket/shape/visual/bucket-lsmlzi-base_link.obj" scale="1.6 1.6 0.5" />
 			</geometry>
 		</visual>
 		
@@ -171,7 +171,7 @@
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<geometry>
-				<mesh filename="${EXAMPLE_21_FOLDER}/bucket/shape/visual/bucket-lsmlzi-base_link.obj" scale="1.6 1.6 0.5" />
+				<mesh filename="${EXAMPLE_21_FOLDER}/assets/bucket/shape/visual/bucket-lsmlzi-base_link.obj" scale="1.6 1.6 0.5" />
 			</geometry>
 		</visual>
 
@@ -185,7 +185,7 @@
 	</static_object>
 
 	<static_object name="bucket_right_left_wall">
-		<origin xyz="0.5 0.6 0.18" rpy="0 0 0" />
+		<origin xyz="0.4 0.6 0.165" rpy="0 0 0" />
 		<collision>
 			<origin xyz="0.0 -0.18 0.0" rpy="0 0 0" />  
 			<geometry>
@@ -195,7 +195,7 @@
 	</static_object>
 
 	<static_object name="bucket_right_back_wall">
-		<origin xyz="0.5 0.6 0.18" rpy="0 0 0" />
+		<origin xyz="0.4 0.6 0.165" rpy="0 0 0" />
 		<collision>
 			<origin xyz="-0.16 0 0" rpy="0 0 0" />  
 			<geometry>
@@ -205,7 +205,7 @@
 	</static_object>
 
 	<static_object name="bucket_right_front_wall">
-		<origin xyz="0.5 0.6 0.18" rpy="0 0 0" />
+		<origin xyz="0.4 0.6 0.165" rpy="0 0 0" />
 		<collision>
 			<origin xyz="0.16 0 0" rpy="0 0 0" />  
 			<geometry>
@@ -220,7 +220,7 @@
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<geometry>
-				<mesh filename="${EXAMPLE_21_FOLDER}/apple/shape/visual/apple-agveuv-base_link.obj" scale="1 1 1" />
+				<mesh filename="${EXAMPLE_21_FOLDER}/assets/apple/shape/visual/apple-agveuv-base_link.obj" scale="1 1 1" />
 			</geometry>
 		</visual>
 
@@ -233,16 +233,18 @@
 
 		<inertial>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
-			<mass value="1" />
+			<mass value="0.5" />
 			<inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0" />
 		</inertial>
 	</dynamic_object>
 
 	
-	<!-- <static_object name="Box_wall_right">
-		<origin xyz="0.5 0.7 0.18" rpy="0.0 0.0 0.0" />
+
+
+	<static_object name="Box_wall_left">
+		<origin xyz="0.4 -0.62 0.165" rpy="0.0 0.0 0.0" />
 		<visual>
-			right side wall
+			<!-- right side wall -->
 			<origin xyz="0.0 0.18 0" rpy="0 0 0" />
 			<geometry>
 				<box size="0.26 0.06 0.1" />
@@ -254,7 +256,7 @@
 		</visual>
 
 		<visual>
-			 left side wall
+			 <!-- left side wall -->
 			<origin xyz="0.0 -0.18 0" rpy="0 0 0" />
 			<geometry>
 				<box size="0.26 0.08 0.1" />
@@ -265,7 +267,7 @@
 		</visual>
 
 		<visual>
-			front wall
+			<!-- front wall -->
 			<origin xyz="0.16 0 0" rpy="0 0 0" />
 			<geometry>
 				<box size="0.06 0.28 0.1" />
@@ -276,7 +278,7 @@
 		</visual>
 
 		<visual>
-			Back wall
+			<!-- Back wall -->
 			<origin xyz="-0.16 0 0" rpy="0 0 0" />
 			<geometry>
 				<box size="0.06 0.28 0.1" />
@@ -285,7 +287,7 @@
 				<color rgba="0.20 0.47 1.00 1.0" />
 			</material>
 		</visual>
-	</static_object> -->
+	</static_object>
 
 	
 
@@ -294,12 +296,12 @@
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<geometry>
-				<mesh filename="${EXAMPLE_21_FOLDER}/box_of_almond_milk/shape/visual/box_of_almond_milk-oiiqwq-base_link.obj" scale="1.0 1.0 1.0" />
+				<mesh filename="${EXAMPLE_21_FOLDER}/assets/box_of_almond_milk/shape/visual/box_of_almond_milk-oiiqwq-base_link.obj" scale="1.0 1.0 1.0" />
 			</geometry>
 		</visual>
 		<inertial>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
-			<mass value="1" />
+			<mass value="0.5" />
 			<inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0" />
 		</inertial>
 		<collision>
@@ -315,7 +317,7 @@
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<geometry>
-				<mesh filename="${EXAMPLE_21_FOLDER}/box_of_coffee/shape/visual/box_of_coffee-cjtadw-base_link.obj" scale="1.0 1.0 1.0" />
+				<mesh filename="${EXAMPLE_21_FOLDER}/assets/box_of_coffee/shape/visual/box_of_coffee-cjtadw-base_link.obj" scale="1.0 1.0 1.0" />
 			</geometry>
 		</visual>
 		<collision>
@@ -326,7 +328,7 @@
 		</collision>
 		<inertial>
 			<origin xyz="0.0 0.0 -0.02" rpy="0 0 0" />
-			<mass value="1" />
+			<mass value="0.5" />
 			<inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0" />
 		</inertial>
 	</dynamic_object>
@@ -336,7 +338,7 @@
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<geometry>
-				<mesh filename="${EXAMPLE_21_FOLDER}/carton_of_orange_juice/shape/visual/carton_of_orange_juice-brryuo-base_link.obj" scale="0.7 0.7 1.2" />
+				<mesh filename="${EXAMPLE_21_FOLDER}/assets/carton_of_orange_juice/shape/visual/carton_of_orange_juice-brryuo-base_link.obj" scale="0.7 0.7 1.2" />
 			</geometry>
 		</visual>
 		<collision>
@@ -347,7 +349,7 @@
 		</collision>
 		<inertial>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
-			<mass value="1" />
+			<mass value="0.5" />
 			<inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0" />
 		</inertial>
 	</dynamic_object>
@@ -371,7 +373,7 @@
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<geometry>
-				<mesh filename="${EXAMPLE_21_FOLDER}/bunch_of_bananas/shape/visual/bunch_of_bananas-mxnwwk-base_link.obj" scale="1.0 1.0 1.0" />
+				<mesh filename="${EXAMPLE_21_FOLDER}/assets/bunch_of_bananas/shape/visual/bunch_of_bananas-mxnwwk-base_link.obj" scale="1.0 1.0 1.0" />
 			</geometry>
 		</visual>
 	</static_object>
@@ -381,7 +383,7 @@
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<geometry>
-				<mesh filename="${EXAMPLE_21_FOLDER}/flower/shape/visual/flower-mylblj-base_link.obj" scale="1.0 1.0 1.0" />
+				<mesh filename="${EXAMPLE_21_FOLDER}/assets/flower/shape/visual/flower-mylblj-base_link.obj" scale="1.0 1.0 1.0" />
 			</geometry>
 		</visual>
 	</static_object>
@@ -392,7 +394,7 @@
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<geometry>
-				<mesh filename="${EXAMPLE_21_FOLDER}/baguette/shape/visual/baguette-xydhpd-base_link.obj" scale="1.0 3.6 3.0" />
+				<mesh filename="${EXAMPLE_21_FOLDER}/assets/baguette/shape/visual/baguette-xydhpd-base_link.obj" scale="1.0 3.6 3.0" />
 			</geometry>
 		</visual>
 		<collision>
@@ -403,7 +405,7 @@
 		</collision>
 		<inertial>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
-			<mass value="1" />
+			<mass value="0.5" />
 			<inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0" />
 		</inertial>
 	</dynamic_object>
@@ -439,7 +441,7 @@
 		<visual>
 			<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
 			<geometry>
-				<mesh filename="${EXAMPLE_21_FOLDER}/background/shape/visual/picture-abtgvz-base_link.obj" scale="17 32 4" />
+				<mesh filename="${EXAMPLE_21_FOLDER}/assets/background/shape/visual/picture-abtgvz-base_link.obj" scale="17 32 4" />
 			</geometry>
 		</visual>
 	</static_object>

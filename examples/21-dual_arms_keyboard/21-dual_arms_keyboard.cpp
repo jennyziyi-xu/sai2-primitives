@@ -360,10 +360,10 @@ int main() {
 				// 2, see if there's an increase compared to the variable objects_in_basket
 				if (count_objects > objects_in_basket) {
 					// if yes, do not move away the emoji . 
-					frame_countedown = 39;
+					frame_countedown = 99;
 				} else {
 					
-					if (frame_countedown >= 40 || frame_countedown <= 0) {
+					if (frame_countedown >= 100 || frame_countedown <= 0) {
 						// move away the emoji 
 						original_pose(0,3) = -20;   
 					} else {
@@ -372,6 +372,7 @@ int main() {
 						
 					}
 				}
+				cout << frame_countedown << endl;
 				objects_in_basket = count_objects;
 
 				graphics->updateObjectGraphics(object_name,
