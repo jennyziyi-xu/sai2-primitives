@@ -325,7 +325,7 @@ int main() {
 
 				// 1. compute how many objects are in the right basket. 
 
-				Vector3d right_bucket_in_world(0.5, 0.6, 0.165);
+				Vector3d right_bucket_in_world(0.4, 0.6, 0.165);
 
 				for (const auto& object_name : sim->getObjectNames()) {
 					if (object_name != "bucket-right"){
@@ -342,7 +342,7 @@ int main() {
 
 				// compute how many objects are in the left basket. 
 
-				Vector3d left_bucket_in_world(0.5, -0.73, 0.165);
+				Vector3d left_bucket_in_world(0.4, -0.62, 0.165);
 
 				for (const auto& object_name : sim->getObjectNames()) {
 					if (object_name != "bucket-left"){
