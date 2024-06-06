@@ -372,7 +372,7 @@ int main() {
 						
 					}
 				}
-				cout << frame_countedown << endl;
+				// cout << frame_countedown << endl;
 				objects_in_basket = count_objects;
 
 				graphics->updateObjectGraphics(object_name,
