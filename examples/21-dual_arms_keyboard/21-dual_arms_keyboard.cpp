@@ -91,8 +91,13 @@ double kv_gripper = 20.0;	// 200
 // How to switch between the two robots
 bool robot_1_is_under_control = true;
 
-bool key_board_only = true;
-// bool key_board_only = false;
+// bool key_board_only = true;
+bool key_board_only = false;
+
+// nearest object
+string nearest_obj_name_1 = "Box1";
+string nearest_obj_name_2 = "Box1";
+const Vector3d control_point = Vector3d(0, 0, 0.27);
 
 // UI torques
 Vector6d UI_torques = Eigen::VectorXd::Zero(6);
@@ -268,6 +273,30 @@ int main() {
 		}
 
 		key_was_pressed = key_pressed;
+
+		map<double, string> distance_1;
+		for (const auto& object_name : sim->getObjectNames()) {
+			Eigen::Affine3d obj_pose_in_world = sim->getObjectPose(object_name);
+			Eigen::Affine3d obj_pose_in_robot_base = T_world_robot.inverse() * obj_pose_in_world;
+			Eigen::Affine3d T_link_base = robot->transform(link_name).inverse();
+			Eigen::Vector3d obj_pos_in_link = T_link_base * obj_pose_in_robot_base.translation() - control_point;
+			double dist = obj_pos_in_link.norm();
+			distance_1.insert({dist, object_name});
+		}
+		auto it_1 = distance_1.begin();
+		nearest_obj_name_1 = it_1->second;
+
+		map<double, string> distance_2;
+		for (const auto& object_name : sim->getObjectNames()) {
+			Eigen::Affine3d obj_pose_in_world = sim->getObjectPose(object_name);
+			Eigen::Affine3d obj_pose_in_robot_base = T_world_robot_2.inverse() * obj_pose_in_world;
+			Eigen::Affine3d T_link_base = robot_2->transform(link_name).inverse();
+			Eigen::Vector3d obj_pos_in_link = T_link_base * obj_pose_in_robot_base.translation() - control_point;
+			double dist = obj_pos_in_link.norm();
+			distance_2.insert({dist, object_name});
+		}
+		auto it_2 = distance_2.begin();
+		nearest_obj_name_2 = it_2->second;
 
 		graphics->updateRobotGraphics(robot_name_2, sim->getJointPositions(robot_name_2));
 		graphics->updateRobotGraphics(robot_name_1, sim->getJointPositions(robot_name_1));	
@@ -451,7 +480,7 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 	bool gripper_hold_obj = false;
 	MatrixXd Jv = MatrixXd::Zero(3,dof);
 	Vector3d gravity = Vector3d(0, 0, -9.8);
-	float mass = 1;
+	float mass = 0.2;
 	Vector3d force = gravity * mass;
 	VectorXd obj_projected_torques = Eigen::VectorXd::Zero(9);
 
@@ -466,6 +495,7 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 	VectorXd local_delta_rot = Eigen::VectorXd::Zero(3);
 
 	bool local_gripper_is_open = true;
+	string local_nearest_obj_name = "Box1";
 
 	while (fSimulationRunning) {
 		// wait for next scheduled loop
@@ -505,10 +535,13 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 			local_delta_xyz = delta_xyz_1;
 			local_delta_rot = delta_rot_1;
 			local_gripper_is_open = gripper_1_is_open;
+			local_nearest_obj_name = nearest_obj_name_1;
+			// cout << "arm1 nearest obj" << local_nearest_obj_name << endl;
 		} else if (robot_name == robot_name_2) {
 			local_delta_xyz = delta_xyz_2;
 			local_delta_rot = delta_rot_2;
 			local_gripper_is_open = gripper_2_is_open;
+			local_nearest_obj_name = nearest_obj_name_2;
 		}
 
 		// Update the goal position and orientation
@@ -548,8 +581,6 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 
 			motion_force_task->setGoalPosition(haptic_output.robot_goal_position);
 			motion_force_task->setGoalOrientation(goal_rot);
-			// motion_force_task->setGoalOrientation(
-			// 	haptic_output.robot_goal_orientation);
 		}
 		// } else {
 		// 	motion_force_task->reInitializeTask();
@@ -565,7 +596,7 @@ void runControl(shared_ptr<Sai2Simulation::Sai2Simulation> sim,
 		if (robot->q()(7) > 0.015) {
 			// Jv = robot->Jv(link_name, control_point);
 			
-			Eigen::Affine3d obj_pose_in_world = sim->getObjectPose("Box2");
+			Eigen::Affine3d obj_pose_in_world = sim->getObjectPose(local_nearest_obj_name);
 			Eigen::Affine3d obj_pose_in_robot_base = T_robot_world * obj_pose_in_world;
 			Eigen::Affine3d T_link_base = robot->transform(link_name).inverse();
 			Vector3d obj_pos_in_link = T_link_base * obj_pose_in_robot_base.translation();
