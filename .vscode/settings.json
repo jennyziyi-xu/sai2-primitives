@@ -9,6 +9,8 @@
         "string_view": "cpp",
         "unordered_map": "cpp",
         "vector": "cpp",
-        "regex": "cpp"
+        "regex": "cpp",
+        "complex": "cpp",
+        "iostream": "cpp"
     }
 }
